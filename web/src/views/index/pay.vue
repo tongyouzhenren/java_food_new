@@ -147,7 +147,7 @@ const formatDate = (time, format = 'YY-MM-DD hh:mm:ss') => {
     }
   }
 
-  .pay-choose-view {
+.pay-choose-view {
     margin-top: 24px;
 
     .choose-box {
@@ -213,6 +213,34 @@ const formatDate = (time, format = 'YY-MM-DD hh:mm:ss') => {
 
     .pay-btn-active {
       background: #4684e2;
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .pay-content {
+    width: 94% !important;
+    margin: 80px auto 0 !important;
+    padding: 0 12px 24px;
+    box-sizing: border-box;
+  }
+
+  .pay-choose-view {
+    .pay-choose-box {
+      flex-direction: column;
+      gap: 12px;
+      max-width: none;
+    }
+
+    .choose-box {
+      width: 100% !important;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .pay-btn {
+      width: 100% !important;
+      max-width: 360px;
     }
   }
 }

@@ -648,7 +648,7 @@ const handleJiesuan = () => {
     }
   }
 
-  .btns-view {
+.btns-view {
     margin-top: 24px;
     text-align: right;
 
@@ -677,6 +677,88 @@ const handleJiesuan = () => {
     }
   }
 
+}
+
+@media screen and (max-width: 768px) {
+  .cart-page {
+    width: 100% !important;
+    margin: 72px 0 32px 0 !important;
+    padding: 0 12px;
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .left-flex,
+  .right-flex {
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  .right-flex {
+    border-top: 1px solid #cedce4 !important;
+    padding-top: 16px !important;
+  }
+
+  .cart-list-view .list-th,
+  .items {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr 0.8fr;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .cart-list-view .list-th span,
+  .items span,
+  .items .pay {
+    margin: 0 !important;
+  }
+
+  .items .book {
+    margin-right: 0 !important;
+  }
+
+  .items h2 {
+    font-size: 14px;
+  }
+
+  .items a-input-number,
+  .items .ant-input-number,
+  .items .ant-input-number-input {
+    width: 100% !important;
+  }
+
+  .remark {
+    margin-top: 12px;
+  }
+
+  .coupon-view {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 10px;
+  }
+
+  .coupon-view .ml-12 {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+
+  .coupon-view .ant-btn {
+    width: 100%;
+  }
+
+  .price-view .btns-view {
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .price-view .btns-view .btn {
+    flex: 1;
+    margin-left: 0 !important;
+    width: auto !important;
+  }
 }
 
 </style>
