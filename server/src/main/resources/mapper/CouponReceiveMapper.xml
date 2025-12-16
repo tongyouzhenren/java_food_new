@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.CouponReceiveMapper">
+
+    <select id="getUserCoupon" resultType="com.gk.study.entity.CouponReceive">
+        select *
+        from b_coupon_receive
+        where user_id = #{userId}
+          and coupon_id = #{couponId}
+        limit 1;
+    </select>
+
+    <update id="markCouponUsed">
+        update b_coupon_receive
+        set status   = '2',
+            use_time = #{useTime}
+        where user_id = #{userId}
+          and coupon_id = #{couponId}
+          and status = '1'
+    </update>
+
+</mapper>

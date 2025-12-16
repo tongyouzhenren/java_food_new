@@ -1,0 +1,5435 @@
+
+====================
+File: pack.py
+====================
+import os
+
+# --- 配置区域 ---
+# 输出文件的名字
+OUTPUT_FILE = "project_context.txt"
+
+# 不需要扫描的文件夹（黑名单）
+IGNORE_DIRS = {
+    "node_modules", ".git", ".idea", ".vscode", "__pycache__",
+    "dist", "build", "venv", "bin", "obj", ".gradle"
+}
+
+# 需要包含的文件后缀（白名单，只读取代码文件）
+# 如果你的代码有其他后缀，可以在这里添加
+INCLUDE_EXTS = {
+    ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".c", ".cpp", ".h",
+    ".html", ".css", ".json", ".sql", ".md", ".txt", ".xml", ".yml", ".yaml",
+    ".go", ".rs", ".php", ".rb"
+}
+# ----------------
+
+def pack_files():
+    total_files = 0
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as out_f:
+        # 获取当前脚本所在目录
+        root_dir = os.getcwd()
+
+        for root, dirs, files in os.walk(root_dir):
+            # 1. 过滤掉不需要的文件夹（原地修改dirs列表）
+            dirs[:] = [d for d in dirs if d not in IGNORE_DIRS]
+
+            for file in files:
+                # 2. 检查后缀名
+                _, ext = os.path.splitext(file)
+                if ext.lower() in INCLUDE_EXTS and file != "packer.py" and file != OUTPUT_FILE:
+                    file_path = os.path.join(root, file)
+                    rel_path = os.path.relpath(file_path, root_dir)
+
+                    try:
+                        # 3. 读取内容并写入
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            content = f.read()
+
+                        # 写入分隔符和文件名，方便AI识别
+                        out_f.write(f"\n{'='*20}\n")
+                        out_f.write(f"File: {rel_path}\n")
+                        out_f.write(f"{'='*20}\n")
+                        out_f.write(content + "\n")
+
+                        print(f"已打包: {rel_path}")
+                        total_files += 1
+                    except Exception as e:
+                        print(f"跳过文件 {rel_path} (无法读取): {e}")
+
+    print(f"\n完成！共打包了 {total_files} 个文件。")
+    print(f"请把目录下的 [{OUTPUT_FILE}] 发送给 Gemini。")
+
+if __name__ == "__main__":
+    pack_files()
+
+====================
+File: pom.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.5.5</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>com.gk</groupId>
+    <artifactId>study</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>springdemo</name>
+    <description>Demo project for Spring Boot</description>
+    <properties>
+        <java.version>1.8</java.version>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- 连接mysql -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.19</version>
+        </dependency>
+        <!-- mybatis-plus -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>1.2.12</version>
+        </dependency>
+        <!-- gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.9.0</version>
+        </dependency>
+        <!--自启动Druid管理后台-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid-spring-boot-starter</artifactId>
+            <version>1.1.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+    <repositories>
+        <!--阿里云仓库，国内速度快-->
+        <repository>
+            <id>aliyun</id>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+    </repositories>
+
+</project>
+
+
+====================
+File: Readme.md
+====================
+# 后端文档
+
+> 运行过程中的问题，可以咨询作者：lengqin1024（微信）
+
+### 功能
+
+* 增删改查
+* 文件上传
+* 数据库配置
+* 日志管理
+* 权限控制
+
+### 后端部署流程
+
+1. 配置端口 位于application.yml
+2. 配置DB_NAME 位于application.yml
+3. 配置BASE_LOCATION 位于application.yml
+4. 修改logback-spring.xml下的LOG_HOME的value值
+5. maven clean -> maven package
+6. 将jar包复制到服务器
+7. 将upload文件夹复制到服务器
+8. 迁移mysql数据库
+9. 运行启动jar包命令
+
+### 运行jar命令（或双击start.sh）
+
+title xxxx
+java -jar -Xms64m -Xmx128m -XX:MetaspaceSize=64m -XX:MaxMetaspaceSize=64m xxxxx.jar
+
+
+### 数据库相关
+
+删除数据库命令：
+
+drop database if exists book;
+
+创建数据库命令：
+
+CREATE DATABASE IF NOT EXISTS book DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+
+数据库备份命令:
+
+mysqldump -u root -p --databases 数据库名称 > xxx.sql
+
+数据库恢复命令：
+
+source D:\\xxx.sql
+
+
+### 常见问题
+
+#### 日志路径
+
+修改logback-spring.xml下的LOG_HOME的value值
+
+#### 配置数据库
+
+application.yml中
+
+#### Druid连接池配置
+
+* application.yml中配置druid
+* 参考链接：https://blog.csdn.net/nothingavenger/article/details/114119585
+* 监控地址：http://localhost:8009/druid/index.html
+
+#### mysql主键id过长
+
+https://blog.csdn.net/qq_46728644/article/details/120772577
+
+#### yml不起作用
+
+需要maven clean一下
+
+#### 注意实体字段最好是String类型
+
+实体字段最好是String类型，mybatis-plus的update的时候，null的不更新
+
+#### 打包步骤
+
+maven clean -> maven package
+
+https://blog.csdn.net/weixin_42822484/article/details/107893586
+
+#### 配置文件上传大小
+
+application.yml中multipart下
+
+#### 静态资源路径配置
+
+https://blog.csdn.net/cylcjsg/article/details/128102776?
+
+#### 跨域配置
+
+见CorsConfig.java
+
+
+
+
+
+
+
+====================
+File: src\main\java\com\gk\study\MySpringApplication.java
+====================
+package com.gk.study;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+/**
+ * @author lengqin1024(微信)
+ * @email net936@163.com
+ */
+@SpringBootApplication
+public class MySpringApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(MySpringApplication.class, args);
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\common\APIResponse.java
+====================
+package com.gk.study.common;
+
+
+import java.io.Serializable;
+
+import lombok.Data;
+
+/**
+ * @功能描述: 响应报文，统一封装类
+ */
+@Data
+public class APIResponse<T> implements Serializable {
+    private int code;
+    private String msg;
+    private T data;
+    private String trace;
+    private long timestamp;
+
+    public APIResponse() {
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    public APIResponse(ResponeCode responseCode) {
+        this.timestamp = System.currentTimeMillis();
+        this.code = responseCode.getCode();
+        this.msg = responseCode.getMsg();
+    }
+
+    public APIResponse(ResponeCode responseCode, String msg) {
+        this(responseCode);
+        this.msg = msg;
+    }
+
+    public APIResponse(ResponeCode responseCode, T data) {
+        this(responseCode);
+        this.data = data;
+    }
+
+    public APIResponse(ResponeCode responseCode, String msg, T data) {
+        this(responseCode);
+        this.trace = msg;
+        this.data = data;
+    }
+
+    @Override
+    public String toString() {
+        return "APIResponse{" +
+                "timestamp=" + timestamp +
+                ", code=" + code +
+                ", msg='" + msg + '\'' +
+                ", trace='" + trace + '\'' +
+                ", data=" + data +
+                //", count=" + count +
+                '}';
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\common\ResponeCode.java
+====================
+package com.gk.study.common;
+
+/**
+ * @功能描述: 响应报文，统一封装类
+ */
+public enum ResponeCode {
+    SUCCESS(200, "成功"),
+    FAIL(400, "失败"),
+    UNAUTHORIZED(401, "未认证"),
+    NOT_FOUND(404, "接口不存在"),
+    INTERNAL_SERVER_ERROR(500, "服务器内部错误");
+
+    private int code;
+    private String msg;
+
+    private ResponeCode(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public int getCode() {
+        return this.code;
+    }
+
+    public String getMsg() {
+        return this.msg;
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\common\TestUtils.java
+====================
+package com.gk.study.common;
+
+public class TestUtils {
+}
+
+
+====================
+File: src\main\java\com\gk\study\config\MyConfig.java
+====================
+package com.gk.study.config;
+
+import com.gk.study.interceptor.AccessInterceptor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry; // 引入这个
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class MyConfig implements WebMvcConfigurer {
+
+    @Value("${File.uploadPath}")
+    private String uploadPath; // 读取 yml 中的路径
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("*")
+                .allowCredentials(true)
+                .allowedMethods("*");
+    }
+
+    // ↓↓↓↓↓↓ 新增这个方法 ↓↓↓↓↓↓
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // 映射图片路径
+        // 前端访问：/api/staticfiles/image/xxx.jpg
+        // 映射到本地：D:/aliyun_workspace/java_food/server/upload/image/xxx.jpg
+
+        // 注意：addResourceHandler 里的路径不包含 context-path (/api)
+        // 如果你的 context-path 是 /api，那么前端访问 /api/staticfiles/... 时，
+        // Spring Boot 内部处理的是 /staticfiles/...
+
+        registry.addResourceHandler("/staticfiles/**")
+                .addResourceLocations("file:" + uploadPath + "/");
+    }
+    // ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new AccessInterceptor());
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\AdController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Ad;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.AdService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * @author lengqin1024(微信)
+ * @email net936@163.com
+ */
+@RestController
+@RequestMapping("/ad")
+public class AdController {
+
+    private final static Logger logger = LoggerFactory.getLogger(AdController.class);
+
+    @Autowired
+    AdService service;
+
+    @Value("${File.uploadPath}")
+    private String uploadPath;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(){
+        List<Ad> list =  service.getAdList();
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(Ad ad) throws IOException {
+        String image = saveAd(ad);
+        if(!StringUtils.isEmpty(image)) {
+            ad.image = image;
+        }
+
+        service.createAd(ad);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteAd(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(Ad ad) throws IOException {
+        String image = saveAd(ad);
+        if(!StringUtils.isEmpty(image)) {
+            ad.image = image;
+        }
+
+        service.updateAd(ad);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+    public String saveAd(Ad ad) throws IOException {
+        MultipartFile file = ad.getImageFile();
+        String newFileName = null;
+        if(file !=null && !file.isEmpty()) {
+
+            // 存文件
+            String oldFileName = file.getOriginalFilename();
+            String randomStr = UUID.randomUUID().toString();
+            newFileName = randomStr + oldFileName.substring(oldFileName.lastIndexOf("."));
+            String filePath = uploadPath + File.separator + "image" + File.separator + newFileName;
+            File destFile = new File(filePath);
+            if(!destFile.getParentFile().exists()){
+                destFile.getParentFile().mkdirs();
+            }
+            file.transferTo(destFile);
+        }
+        if(!StringUtils.isEmpty(newFileName)) {
+            ad.image = newFileName;
+        }
+        return newFileName;
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\AddressController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Address;
+import com.gk.study.service.AddressService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
+/**
+ * @author lengqin1024(微信)
+ * @email net936@163.com
+ */
+@RestController
+@RequestMapping("/address")
+public class AddressController {
+
+    private final static Logger logger = LoggerFactory.getLogger(AddressController.class);
+
+    @Autowired
+    AddressService service;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(String userId){
+        List<Address> list =  service.getAddressList(userId);
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(Address address) throws IOException {
+        if(address.getDef().equals("1")){
+            // 其它置0
+            List<Address> list =  service.getAddressList(address.getUserId());
+            for(Address address1: list) {
+                address1.setDef("0");
+                service.updateAddress(address1);
+            }
+        }
+        service.createAddress(address);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteAddress(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(Address address) throws IOException {
+        if(address.getDef().equals("1")){
+            // 其它置0
+            List<Address> list =  service.getAddressList(address.getUserId());
+            for(Address address1: list) {
+                address1.setDef("0");
+                service.updateAddress(address1);
+            }
+        }
+        service.updateAddress(address);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\BannerController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Banner;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.BannerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/banner")
+public class BannerController {
+
+    private final static Logger logger = LoggerFactory.getLogger(BannerController.class);
+
+    @Autowired
+    BannerService service;
+
+    @Value("${File.uploadPath}")
+    private String uploadPath;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(){
+        List<Banner> list =  service.getBannerList();
+
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(Banner banner) throws IOException {
+        String image = saveBanner(banner);
+        if(!StringUtils.isEmpty(image)) {
+            banner.image = image;
+        }
+
+        service.createBanner(banner);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteBanner(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(Banner banner) throws IOException {
+        String image = saveBanner(banner);
+        if(!StringUtils.isEmpty(image)) {
+            banner.image = image;
+        }
+
+        service.updateBanner(banner);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+    public String saveBanner(Banner banner) throws IOException {
+        MultipartFile file = banner.getImageFile();
+        String newFileName = null;
+        if(file !=null && !file.isEmpty()) {
+
+            // 存文件
+            String oldFileName = file.getOriginalFilename();
+            String randomStr = UUID.randomUUID().toString();
+            newFileName = randomStr + oldFileName.substring(oldFileName.lastIndexOf("."));
+            String filePath = uploadPath + File.separator + "banner" + File.separator + newFileName;
+            File destFile = new File(filePath);
+            if(!destFile.getParentFile().exists()){
+                destFile.getParentFile().mkdirs();
+            }
+            file.transferTo(destFile);
+        }
+        if(!StringUtils.isEmpty(newFileName)) {
+            banner.image = newFileName;
+        }
+        return newFileName;
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\ClassificationController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Classification;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.ClassificationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
+/**
+ * @author lengqin1024(微信)
+ * @email net936@163.com
+ */
+@RestController
+@RequestMapping("/classification")
+public class ClassificationController {
+
+    private final static Logger logger = LoggerFactory.getLogger(ClassificationController.class);
+
+    @Autowired
+    ClassificationService service;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(){
+        List<Classification> list =  service.getClassificationList();
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(Classification classification) throws IOException {
+        service.createClassification(classification);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteClassification(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(Classification classification) throws IOException {
+        service.updateClassification(classification);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\CommentController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Comment;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.CommentService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
+
+@RestController
+@RequestMapping("/comment")
+public class CommentController {
+
+    private final static Logger logger = LoggerFactory.getLogger(CommentController.class);
+
+    @Autowired
+    CommentService service;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(){
+        List<Comment> list =  service.getCommentList();
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+
+    // 商品的所有评论
+    @RequestMapping(value = "/listThingComments", method = RequestMethod.GET)
+    public APIResponse listThingComments(String thingId, String order){
+        List<Comment> list =  service.getThingCommentList(thingId, order);
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    // 用户的所有评论
+    @RequestMapping(value = "/listUserComments", method = RequestMethod.GET)
+    public APIResponse listUserComments(String userId){
+        List<Comment> list =  service.getUserCommentList(userId);
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(Comment comment) throws IOException {
+        service.createComment(comment);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteComment(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(Comment comment) throws IOException {
+        service.updateComment(comment);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+    @RequestMapping(value = "/like", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse like(String id) throws IOException {
+        Comment commentBean = service.getCommentDetail(id);
+        int likeCount = Integer.parseInt(commentBean.getLikeCount()) + 1;
+        commentBean.setLikeCount(String.valueOf(likeCount));
+        service.updateComment(commentBean);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\CouponController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Coupon;
+import com.gk.study.entity.User;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.CouponService;
+import com.gk.study.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+@RestController
+@RequestMapping("/coupon")
+public class CouponController {
+
+    @Autowired
+    CouponService service;
+
+    @Autowired
+    UserService userService;
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list() {
+        List<Coupon> list = service.getCouponList();
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    public APIResponse create(Coupon coupon) {
+        service.createCoupon(coupon);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    public APIResponse update(Coupon coupon) {
+        service.updateCoupon(coupon);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids) {
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteCoupon(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @Access(level = AccessLevel.LOGIN)
+    @RequestMapping(value = "/check", method = RequestMethod.GET)
+    public APIResponse check(String code, HttpServletRequest request) {
+        String userId = getUserId(request);
+        Coupon coupon = service.getUserAvailableCoupon(code, userId);
+        if (coupon == null) {
+            return new APIResponse(ResponeCode.FAIL, "优惠口令无效、未领取或已过期");
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "口令验证成功", coupon);
+    }
+
+    @Access(level = AccessLevel.LOGIN)
+    @RequestMapping(value = "/receive", method = RequestMethod.POST)
+    public APIResponse receive(String code, HttpServletRequest request) {
+        String userId = getUserId(request);
+        Coupon coupon = service.receiveCoupon(code, userId);
+        if (coupon == null) {
+            return new APIResponse(ResponeCode.FAIL, "优惠口令无效、已使用或已过期");
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "领取成功", coupon);
+    }
+
+    private String getUserId(HttpServletRequest request) {
+        User user = userService.getUserByToken(request.getHeader("TOKEN"));
+        return user == null ? null : String.valueOf(user.getId());
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\ErrorLogController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.ErrorLog;
+import com.gk.study.service.ErrorLogService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
+
+@RestController
+@RequestMapping("/errorLog")
+public class ErrorLogController {
+
+    private final static Logger logger = LoggerFactory.getLogger(ErrorLogController.class);
+
+    @Autowired
+    ErrorLogService service;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(){
+        List<ErrorLog> list =  service.getErrorLogList();
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(ErrorLog errorLog) throws IOException {
+        service.createErrorLog(errorLog);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteErrorLog(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(ErrorLog errorLog) throws IOException {
+        service.updateErrorLog(errorLog);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\NoticeController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Notice;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.NoticeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
+
+@RestController
+@RequestMapping("/notice")
+public class NoticeController {
+
+    private final static Logger logger = LoggerFactory.getLogger(NoticeController.class);
+
+    @Autowired
+    NoticeService service;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(){
+        List<Notice> list =  service.getNoticeList();
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(Notice notice) throws IOException {
+        service.createNotice(notice);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteNotice(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(Notice notice) throws IOException {
+        service.updateNotice(notice);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\OpLogController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.OpLog;
+import com.gk.study.service.OpLogService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
+
+// 负责操作日志和登录日志
+@RestController
+@RequestMapping("/opLog")
+public class OpLogController {
+
+    private final static Logger logger = LoggerFactory.getLogger(OpLogController.class);
+
+    @Autowired
+    OpLogService service;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(){
+        List<OpLog> list =  service.getOpLogList();
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @RequestMapping(value = "/loginLogList", method = RequestMethod.GET)
+    public APIResponse loginLogList(){
+        List<OpLog> list =  service.getLoginLogList();
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(OpLog opLog) throws IOException {
+        service.createOpLog(opLog);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteOpLog(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(OpLog opLog) throws IOException {
+        service.updateOpLog(opLog);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\OrderController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Order;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.OrderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
+
+@RestController
+@RequestMapping("/order")
+public class OrderController {
+
+    private final static Logger logger = LoggerFactory.getLogger(OrderController.class);
+
+    @Autowired
+    OrderService service;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(){
+        List<Order> list =  service.getOrderList();
+
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    // 用户订单
+    @RequestMapping(value = "/userOrderList", method = RequestMethod.GET)
+    public APIResponse userOrderList(String userId, String status){
+        List<Order> list =  service.getUserOrderList(userId, status);
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(Order order) throws IOException {
+        service.createOrder(order);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteOrder(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(Order order) throws IOException {
+        service.updateOrder(order);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/cancelOrder", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse cancelOrder(Long id) throws IOException {
+        Order order = new Order();
+        order.setId(id);
+        order.setStatus("7"); // 7=取消
+        service.updateOrder(order);
+        return new APIResponse(ResponeCode.SUCCESS, "取消成功");
+    }
+
+    @Access(level = AccessLevel.LOGIN)
+    @RequestMapping(value = "/cancelUserOrder", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse cancelUserOrder(Long id) throws IOException {
+        Order order = new Order();
+        order.setId(id);
+        order.setStatus("7"); // 7=取消
+        service.updateOrder(order);
+        return new APIResponse(ResponeCode.SUCCESS, "取消成功");
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\OverViewController.java
+====================
+package com.gk.study.controller;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.sun.management.OperatingSystemMXBean;
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Order;
+import com.gk.study.entity.Thing;
+import com.gk.study.entity.VisitData;
+import com.gk.study.mapper.OrderMapper;
+import com.gk.study.mapper.OverviewMapper;
+import com.gk.study.mapper.ThingMapper;
+import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.lang.management.ManagementFactory;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+@RestController
+@RequestMapping("/overview")
+public class OverViewController {
+
+    @Autowired
+    ThingMapper thingMapper;
+
+    @Autowired
+    OrderMapper orderMapper;
+
+    @Autowired
+    OverviewMapper overviewMapper;
+
+    private final static Logger logger = LoggerFactory.getLogger(OverViewController.class);
+
+    @RequestMapping(value = "/sysInfo", method = RequestMethod.GET)
+    public APIResponse sysInfo() {
+
+        Map<String, String> map = new HashMap<>();
+        map.put("sysName", "后台系统");
+        map.put("versionName", "1.0");
+        map.put("processor", "2");
+        map.put("sysLan", "En");
+        map.put("sysZone", "东八区");
+
+        OperatingSystemMXBean osmxb = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        map.put("pf", osmxb.getArch());
+        map.put("osName", osmxb.getName());
+        map.put("cpuCount", String.valueOf(osmxb.getAvailableProcessors()));
+
+        DecimalFormat df = new DecimalFormat("#,##0.0");
+
+        //获取CPU
+        double cpuLoad = osmxb.getSystemCpuLoad();
+        //获取内存
+        double totalvirtualMemory = osmxb.getTotalPhysicalMemorySize();
+        double freePhysicalMemorySize = osmxb.getFreePhysicalMemorySize();
+        double value = freePhysicalMemorySize / totalvirtualMemory;
+        double percentMemoryLoad = ((1 - value) * 100);
+        map.put("cpuLoad", df.format(cpuLoad * 100));
+        map.put("memory", df.format(totalvirtualMemory / 1024 / 1024 / 1024));
+        map.put("usedMemory", df.format((totalvirtualMemory - freePhysicalMemorySize) / 1024 / 1024 / 1024));
+        map.put("percentMemory", df.format(percentMemoryLoad));
+
+        map.put("jvmVersion", System.getProperty("java.version"));
+
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", map);
+    }
+
+    @RequestMapping(value = "/count", method = RequestMethod.GET)
+    public APIResponse count() {
+
+
+        Map<String, Object> map = new HashMap<>();
+
+        // 商品总数
+        QueryWrapper<Thing> queryWrapper = new QueryWrapper<>();
+        long spzs = thingMapper.selectCount(queryWrapper);
+        map.put("spzs", spzs);
+
+        long now = System.currentTimeMillis();
+        long sevenMillis = now - 7 * 24 * 60 * 60 * 1000; // 7天前
+        System.out.println(sevenMillis);
+
+        // 七日新增
+        queryWrapper.ge("create_time", sevenMillis);
+        long qrxz = thingMapper.selectCount(queryWrapper);
+        map.put("qrxz", qrxz);
+
+        // 未付订单
+        QueryWrapper<Order> orderQueryWrapper = new QueryWrapper<>();
+        orderQueryWrapper.eq("status", "1");
+        long wfdd = orderMapper.selectCount(orderQueryWrapper);
+        map.put("wfdd", wfdd);
+
+        // 未付订单人数
+        orderQueryWrapper = new QueryWrapper<>();
+        orderQueryWrapper.select("distinct user_id");
+        orderQueryWrapper.eq("status", "1");
+        orderQueryWrapper.groupBy("user_id");
+        map.put("wfddrs", orderMapper.selectList(orderQueryWrapper).size());
+
+        // 已付订单
+        orderQueryWrapper = new QueryWrapper<>();
+        orderQueryWrapper.eq("status", "2");
+        long yfdd = orderMapper.selectCount(orderQueryWrapper);
+        map.put("yfdd", yfdd);
+
+        // 已付订单人数
+        orderQueryWrapper = new QueryWrapper<>();
+        orderQueryWrapper.select("distinct user_id");
+        orderQueryWrapper.eq("status", "2");
+        orderQueryWrapper.groupBy("user_id");
+        map.put("yfddrs", orderMapper.selectList(orderQueryWrapper).size());
+
+        // 取消订单
+        orderQueryWrapper = new QueryWrapper<>();
+        orderQueryWrapper.eq("status", "7");
+        long qxdd = orderMapper.selectCount(orderQueryWrapper);
+        map.put("qxdd", qxdd);
+
+        // 取消订单人数
+        orderQueryWrapper = new QueryWrapper<>();
+        orderQueryWrapper.select("distinct user_id");
+        orderQueryWrapper.eq("status", "7");
+        orderQueryWrapper.groupBy("user_id");
+        map.put("qxddrs", orderMapper.selectList(orderQueryWrapper).size());
+
+
+//        // 热门商品
+//        List<Object> popularThings = overviewMapper.getPopularThing();
+//        map.put("popularThings", popularThings);
+//
+//        // 热门分类
+//        List<Object> popularClassification = overviewMapper.getPopularClassification();
+//        map.put("popularClassification", popularClassification);
+
+        // 网站流量
+        List<Object> visitList = new ArrayList<>();
+        List<String> sevenList = getSevenDate();
+        for(String day: sevenList){
+            Map<String, String> visitMap = new HashMap<>();
+            visitMap.put("day", day);
+            int pv = 0;
+            int uv = 0;
+            List<VisitData> webVisitData = overviewMapper.getWebVisitData(day);
+            for(VisitData visitData: webVisitData) {
+                pv += visitData.count;
+            }
+            uv = webVisitData.size();
+            visitMap.put("pv", String.valueOf(pv));
+            visitMap.put("uv", String.valueOf(uv));
+            visitList.add(visitMap);
+        }
+        map.put("visitList", visitList);
+
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", map);
+    }
+
+
+    public static List<String> getSevenDate() {
+
+        List<String> dateList = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+        for (int i = 0; i < 7; i++) {
+
+            Date date = DateUtils.addDays(new Date(), -i);
+            String formatDate = sdf.format(date);
+            dateList.add(formatDate);
+        }
+        Collections.reverse(dateList);
+        return dateList;
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\TagController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Tag;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.TagService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
+/**
+ * @author lengqin1024(微信)
+ * @email net936@163.com
+ */
+@RestController
+@RequestMapping("/tag")
+public class TagController {
+
+    private final static Logger logger = LoggerFactory.getLogger(TagController.class);
+
+    @Autowired
+    TagService service;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(){
+        List<Tag> list =  service.getTagList();
+
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(Tag tag) throws IOException {
+        service.createTag(tag);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteTag(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(Tag tag) throws IOException {
+        service.updateTag(tag);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\ThingCollectController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.ThingCollect;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.ThingCollectService;
+import com.gk.study.service.ThingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/thingCollect")
+public class ThingCollectController {
+
+    private final static Logger logger = LoggerFactory.getLogger(ThingCollectController.class);
+
+    @Autowired
+    ThingCollectService thingCollectService;
+
+    @Autowired
+    ThingService thingService;
+
+    @Access(level = AccessLevel.LOGIN)
+    @RequestMapping(value = "/collect", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse collect(ThingCollect thingCollect) throws IOException {
+        if(thingCollectService.getThingCollect(thingCollect.getUserId(), thingCollect.getThingId()) != null){
+            return new APIResponse(ResponeCode.SUCCESS, "您已收藏过了");
+        }else {
+            thingCollectService.createThingCollect(thingCollect);
+            thingService.addCollectCount(thingCollect.getThingId());
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "收藏成功");
+    }
+
+    @Access(level = AccessLevel.LOGIN)
+    @RequestMapping(value = "/unCollect", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse unCollect(String id) throws IOException {
+        thingCollectService.deleteThingCollect(id);
+        return new APIResponse(ResponeCode.SUCCESS, "取消收藏成功");
+    }
+
+    @RequestMapping(value = "/getUserCollectList", method = RequestMethod.GET)
+    @Transactional
+    public APIResponse getUserCollectList(String userId) throws IOException {
+        List<Map> lists = thingCollectService.getThingCollectList(userId);
+        return new APIResponse(ResponeCode.SUCCESS, "获取成功", lists);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\ThingController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.Thing;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.ThingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/thing")
+public class ThingController {
+
+    private final static Logger logger = LoggerFactory.getLogger(ThingController.class);
+
+    @Autowired
+    ThingService service;
+
+    @Value("${File.uploadPath}")
+    private String uploadPath;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(String keyword, String sort, String c, String tag){
+        List<Thing> list =  service.getThingList(keyword, sort, c, tag);
+
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @RequestMapping(value = "/detail", method = RequestMethod.GET)
+    public APIResponse detail(String id){
+        Thing thing =  service.getThingById(id);
+
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", thing);
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(Thing thing) throws IOException {
+        String url = saveThing(thing);
+        if(!StringUtils.isEmpty(url)) {
+            thing.cover = url;
+        }
+
+        service.createThing(thing);
+        return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            service.deleteThing(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(Thing thing) throws IOException {
+        System.out.println(thing);
+        String url = saveThing(thing);
+        if(!StringUtils.isEmpty(url)) {
+            thing.cover = url;
+        }
+
+        service.updateThing(thing);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+    public String saveThing(Thing thing) throws IOException {
+        MultipartFile file = thing.getImageFile();
+        String newFileName = null;
+        if(file !=null && !file.isEmpty()) {
+
+            // 存文件
+            String oldFileName = file.getOriginalFilename();
+            String randomStr = UUID.randomUUID().toString();
+            newFileName = randomStr + oldFileName.substring(oldFileName.lastIndexOf("."));
+            String filePath = uploadPath + File.separator + "image" + File.separator + newFileName;
+            File destFile = new File(filePath);
+            if(!destFile.getParentFile().exists()){
+                destFile.getParentFile().mkdirs();
+            }
+            file.transferTo(destFile);
+        }
+        if(!StringUtils.isEmpty(newFileName)) {
+            thing.cover = newFileName;
+        }
+        return newFileName;
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\ThingWishController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.ThingWish;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.ThingService;
+import com.gk.study.service.ThingWishService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/thingWish")
+public class ThingWishController {
+
+    private final static Logger logger = LoggerFactory.getLogger(ThingWishController.class);
+
+    @Autowired
+    ThingWishService thingWishService;
+
+    @Autowired
+    ThingService thingService;
+
+    @Access(level = AccessLevel.LOGIN)
+    @RequestMapping(value = "/wish", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse wish(ThingWish thingWish) throws IOException {
+        if(thingWishService.getThingWish(thingWish.getUserId(), thingWish.getThingId()) != null){
+            return new APIResponse(ResponeCode.SUCCESS, "您已添加过了");
+        }else {
+            thingWishService.createThingWish(thingWish);
+            thingService.addWishCount(thingWish.getThingId());
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "添加成功");
+    }
+
+    @Access(level = AccessLevel.LOGIN)
+    @RequestMapping(value = "/unWish", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse unWish(String id) throws IOException {
+        thingWishService.deleteThingWish(id);
+        return new APIResponse(ResponeCode.SUCCESS, "取消收藏成功");
+    }
+
+    @RequestMapping(value = "/getUserWishList", method = RequestMethod.GET)
+    @Transactional
+    public APIResponse getUserWishList(String userId) throws IOException {
+        List<Map> lists = thingWishService.getThingWishList(userId);
+        return new APIResponse(ResponeCode.SUCCESS, "获取成功", lists);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\controller\UserController.java
+====================
+package com.gk.study.controller;
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.User;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+/**
+ * @author lengqin1024(微信)
+ * @email net936@163.com
+ */
+@RestController
+@RequestMapping("/user")
+public class UserController {
+
+    private final static Logger logger = LoggerFactory.getLogger(UserController.class);
+
+    String salt = "abcd1234";
+
+    @Autowired
+    UserService userService;
+
+    @Value("${File.uploadPath}")
+    private String uploadPath;
+
+    @RequestMapping(value = "/list", method = RequestMethod.GET)
+    public APIResponse list(String keyword){
+        List<User> list =  userService.getUserList(keyword);
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", list);
+    }
+
+    @RequestMapping(value = "/detail", method = RequestMethod.GET)
+    public APIResponse detail(String userId){
+        User user =  userService.getUserDetail(userId);
+        return new APIResponse(ResponeCode.SUCCESS, "查询成功", user);
+    }
+
+    // 后台用户登录
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public APIResponse login(User user){
+        user.setPassword(DigestUtils.md5DigestAsHex((user.getPassword() + salt).getBytes()));
+        User responseUser =  userService.getAdminUser(user);
+        if(responseUser != null) {
+            return new APIResponse(ResponeCode.SUCCESS, "查询成功", responseUser);
+        }else {
+            return new APIResponse(ResponeCode.FAIL, "用户名或密码错误");
+        }
+    }
+
+    // 普通用户登录
+    @RequestMapping(value = "/userLogin", method = RequestMethod.POST)
+    public APIResponse userLogin(User user){
+        user.setPassword(DigestUtils.md5DigestAsHex((user.getPassword() + salt).getBytes()));
+        User responseUser =  userService.getNormalUser(user);
+        if(responseUser != null) {
+            return new APIResponse(ResponeCode.SUCCESS, "查询成功", responseUser);
+        }else {
+            return new APIResponse(ResponeCode.FAIL, "用户名或密码错误");
+        }
+    }
+
+    // 普通用户注册
+    @RequestMapping(value = "/userRegister", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse userRegister(User user) throws IOException {
+
+        if (!StringUtils.isEmpty(user.getUsername())
+                && !StringUtils.isEmpty(user.getPassword())
+                && !StringUtils.isEmpty(user.getRePassword())) {
+            // 查重
+            if(userService.getUserByUserName(user.getUsername()) != null) {
+                return new APIResponse(ResponeCode.FAIL, "用户名重复");
+            }
+            // 验证密码
+            if(!user.getPassword().equals(user.getRePassword())) {
+                return new APIResponse(ResponeCode.FAIL, "密码不一致");
+            }
+            String md5Str = DigestUtils.md5DigestAsHex((user.getPassword() + salt).getBytes());
+            // 设置密码
+            user.setPassword(md5Str);
+            md5Str = DigestUtils.md5DigestAsHex((user.getUsername() + salt).getBytes());
+            // 设置token
+            user.setToken(md5Str);
+
+            String avatar = saveAvatar(user);
+            if(!StringUtils.isEmpty(avatar)) {
+                user.avatar = avatar;
+            }
+            // 设置角色
+            user.setRole(String.valueOf(User.NormalUser));
+            // 设置状态
+            user.setStatus("0");
+            user.setCreateTime(String.valueOf(System.currentTimeMillis()));
+
+            userService.createUser(user);
+            return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+        }
+        return new APIResponse(ResponeCode.FAIL, "创建失败");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse create(User user) throws IOException {
+
+        if (!StringUtils.isEmpty(user.getUsername()) || !StringUtils.isEmpty(user.getPassword())) {
+            // 查重
+            if(userService.getUserByUserName(user.getUsername()) != null) {
+                return new APIResponse(ResponeCode.FAIL, "用户名重复");
+            }
+            String md5Str = DigestUtils.md5DigestAsHex((user.getPassword() + salt).getBytes());
+            // 设置密码
+            user.setPassword(md5Str);
+            md5Str = DigestUtils.md5DigestAsHex((user.getUsername() + salt).getBytes());
+            // 设置token
+            user.setToken(md5Str);
+            user.setCreateTime(String.valueOf(System.currentTimeMillis()));
+
+            String avatar = saveAvatar(user);
+            if(!StringUtils.isEmpty(avatar)) {
+                user.avatar = avatar;
+            }
+            userService.createUser(user);
+            return new APIResponse(ResponeCode.SUCCESS, "创建成功");
+        }
+        return new APIResponse(ResponeCode.FAIL, "创建失败");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/delete", method = RequestMethod.POST)
+    public APIResponse delete(String ids){
+        System.out.println("ids===" + ids);
+        // 批量删除
+        String[] arr = ids.split(",");
+        for (String id : arr) {
+            userService.deleteUser(id);
+        }
+        return new APIResponse(ResponeCode.SUCCESS, "删除成功");
+    }
+
+    @Access(level = AccessLevel.ADMIN)
+    @RequestMapping(value = "/update", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse update(User user) throws IOException {
+        // update不能修改密码，故置空
+        user.setPassword(null);
+        String avatar = saveAvatar(user);
+        if(!StringUtils.isEmpty(avatar)) {
+            user.avatar = avatar;
+        }
+        userService.updateUser(user);
+        System.out.println(user);
+        return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+    }
+
+
+    @Access(level = AccessLevel.LOGIN)
+    @RequestMapping(value = "/updateUserInfo", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse updateUserInfo(User user) throws IOException {
+        User tmpUser =  userService.getUserDetail(user.getId());
+        if(tmpUser.getRole().equals(String.valueOf(User.NormalUser))){
+            // username和password不能改，故置空
+            user.setUsername(null);
+            user.setPassword(null);
+            user.setRole(String.valueOf(User.NormalUser));
+            String avatar = saveAvatar(user);
+            if(!StringUtils.isEmpty(avatar)) {
+                user.avatar = avatar;
+            }
+            userService.updateUser(user);
+            return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+        }else {
+            return new APIResponse(ResponeCode.FAIL, "非法操作");
+        }
+    }
+
+    @Access(level = AccessLevel.LOGIN)
+    @RequestMapping(value = "/updatePwd", method = RequestMethod.POST)
+    @Transactional
+    public APIResponse updatePwd(String userId, String password, String newPassword) throws IOException {
+        User user =  userService.getUserDetail(userId);
+        if(user.getRole().equals(String.valueOf(User.NormalUser))) {
+            String md5Pwd = DigestUtils.md5DigestAsHex((password + salt).getBytes());
+            if(user.getPassword().equals(md5Pwd)){
+                user.setPassword(DigestUtils.md5DigestAsHex((newPassword + salt).getBytes()));
+                userService.updateUser(user);
+            }else {
+                return new APIResponse(ResponeCode.FAIL, "原密码错误");
+            }
+            return new APIResponse(ResponeCode.SUCCESS, "更新成功");
+        }else {
+            return new APIResponse(ResponeCode.FAIL, "非法操作");
+        }
+
+    }
+
+    public String saveAvatar(User user) throws IOException {
+        MultipartFile file = user.getAvatarFile();
+        String newFileName = null;
+        if(file !=null && !file.isEmpty()) {
+
+            // 存文件
+            String oldFileName = file.getOriginalFilename();
+            String randomStr = UUID.randomUUID().toString();
+            newFileName = randomStr + oldFileName.substring(oldFileName.lastIndexOf("."));
+            String filePath = uploadPath + File.separator + "avatar" + File.separator + newFileName;
+            File destFile = new File(filePath);
+            if(!destFile.getParentFile().exists()){
+                destFile.getParentFile().mkdirs();
+            }
+            file.transferTo(destFile);
+        }
+        if(!StringUtils.isEmpty(newFileName)) {
+            user.avatar = newFileName;
+        }
+        return newFileName;
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\Ad.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.Serializable;
+
+@Data
+@TableName("b_ad")
+public class Ad implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String image;
+    @TableField(exist = false)
+    public MultipartFile imageFile;
+    @TableField
+    public String link;
+    @TableField
+    public String createTime;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\Address.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_address")
+public class Address implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String name;
+    @TableField
+    public String mobile;
+    @TableField
+    public String description;
+    @TableField
+    public String def; // 默认
+    @TableField
+    public String createTime;
+    @TableField
+    public String userId;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\Banner.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_banner")
+public class Banner implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String image;
+    @TableField(exist = false)
+    public MultipartFile imageFile;
+    @TableField
+    public Long thingId;
+    @TableField
+    public String createTime;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\Classification.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.Serializable;
+import java.sql.Date;
+
+@Data
+@TableName("b_classification")
+public class Classification implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String title;
+    @TableField
+    public String createTime;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\Comment.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_comment")
+public class Comment implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String content;
+    @TableField
+    public String commentTime;
+    @TableField
+    public String likeCount;
+    @TableField
+    public String userId;
+    @TableField(exist = false)
+    public String username; // 用户名
+    @TableField
+    public String thingId;
+    @TableField(exist = false)
+    public String title; // 商品名称
+    @TableField(exist = false)
+    public String cover; // 商品封面
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\Coupon.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_coupon")
+public class Coupon implements Serializable {
+    @TableId(value = "id", type = IdType.AUTO)
+    public Long id;
+
+    @TableField
+    public String title; // 优惠券名称
+
+    @TableField
+    public String code; // 兑换口令
+
+    @TableField
+    public String discountAmount; // 优惠金额
+
+    @TableField
+    public String status; // 1=启用, 0=停用
+
+    @TableField
+    public String expireTime; // 过期时间（时间戳）
+
+    @TableField
+    public String createTime;
+
+    @TableField
+    public String remark;
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\CouponReceive.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_coupon_receive")
+public class CouponReceive implements Serializable {
+    @TableId(value = "id", type = IdType.AUTO)
+    public Long id;
+
+    @TableField
+    public String couponId;
+
+    @TableField
+    public String userId;
+
+    @TableField
+    public String status; // 1=未使用，2=已使用
+
+    @TableField
+    public String receiveTime;
+
+    @TableField
+    public String useTime;
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\ErrorLog.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_error_log")
+public class ErrorLog implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String ip;
+    @TableField
+    public String url;
+    @TableField
+    public String method;
+    @TableField
+    public String content;
+    @TableField
+    public String logTime;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\Notice.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_notice")
+public class Notice implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String title;
+    @TableField
+    public String content;
+    @TableField
+    public String createTime;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\OpLog.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+
+import java.io.Serializable;
+import java.util.Date;
+
+@Data
+@TableName("b_op_log")
+public class OpLog implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String reIp;
+    @TableField
+    public String reTime;
+    @TableField
+    public String reUa;
+    @TableField
+    public String reUrl;
+    @TableField
+    public String reMethod;
+    @TableField
+    public String reContent;
+    @TableField
+    public String accessTime;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\Order.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_order")
+public class Order implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String status;
+    @TableField
+    public String orderTime;
+    @TableField
+    public String payTime;
+    @TableField
+    public String thingId;
+    @TableField
+    public String userId;
+    @TableField
+    public String gwc; // 购物车
+    @TableField
+    public String amount; // 总额
+    @TableField
+    public String orderNumber; // 订单编号
+    @TableField
+    public String receiverAddress;
+    @TableField
+    public String receiverName;
+    @TableField
+    public String receiverPhone;
+    @TableField
+    public String remark;
+
+    @TableField(exist = false)
+    public String username; // 用户名
+    @TableField(exist = false)
+    public String title; // 商品名称
+    @TableField(exist = false)
+    public String cover; // 商品封面
+    @TableField(exist = false)
+    public String price; // 商品价格
+
+    @TableField
+    public String couponCode; // 优惠口令
+
+    @TableField
+    public String discountAmount; // 优惠金额
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\Tag.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_tag")
+public class Tag implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String title;
+    @TableField
+    public String createTime;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\Thing.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.Serializable;
+import java.util.List;
+
+@Data
+@TableName("b_thing")
+public class Thing implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String title;
+    @TableField
+    public String nickname;
+    @TableField
+    public String sex;
+    @TableField
+    public String address;
+    @TableField
+    public String cover;
+    @TableField
+    public String description;
+    @TableField
+    public String price;
+    @TableField
+    public String status;
+    @TableField
+    public String createTime;
+    @TableField
+    public String score;
+    @TableField
+    public String pv;
+    @TableField
+    public String recommendCount;
+    @TableField
+    public String wishCount;
+    @TableField
+    public String collectCount;
+    @TableField
+    public Long classificationId;
+
+    @TableField(exist = false)
+    public List<Long> tags; // 标签
+
+    @TableField(exist = false)
+    public MultipartFile imageFile;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\ThingCollect.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+
+@Data
+@TableName("b_thing_collect")
+public class ThingCollect implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String thingId;
+    @TableField
+    public String userId;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\ThingTag.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_thing_tag")
+public class ThingTag implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public Long thingId;
+    @TableField
+    public Long tagId;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\ThingWish.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import java.io.Serializable;
+
+
+@Data
+@TableName("b_thing_wish")
+public class ThingWish implements Serializable {
+    @TableId(value = "id",type = IdType.AUTO)
+    public Long id;
+    @TableField
+    public String thingId;
+    @TableField
+    public String userId;
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\User.java
+====================
+package com.gk.study.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.Serializable;
+
+@Data
+@TableName("b_user")
+public class User implements Serializable {
+    public static final int NormalUser = 1;
+    public static final int DemoUser = 2;
+    public static final int AdminUser = 3;
+
+    @TableId(value = "id",type = IdType.AUTO)
+    public String id;
+    @TableField
+    public String username;
+    @TableField
+    public String password;
+    @TableField(exist = false)
+    public String rePassword;
+    @TableField
+    public String nickname;
+    @TableField
+    public String mobile;
+    @TableField
+    public String email;
+    @TableField
+    public String description;
+    @TableField
+    public String role;
+    @TableField
+    public String status;
+    @TableField
+    public String score;
+    @TableField
+    public String avatar;
+    @TableField(exist = false)
+    public MultipartFile avatarFile;
+    @TableField
+    public String token;
+    @TableField
+    public String createTime;
+    @TableField
+    public String pushEmail;
+    @TableField
+    public String pushSwitch;
+
+
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\entity\VisitData.java
+====================
+package com.gk.study.entity;
+
+public class VisitData {
+
+    public String reIp;
+    public int count;
+}
+
+
+====================
+File: src\main\java\com\gk\study\handler\CustomExceptionHandler.java
+====================
+package com.gk.study.handler;
+
+
+import com.gk.study.common.APIResponse;
+import com.gk.study.service.ErrorLogService;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.ErrorLog;
+import com.gk.study.utils.HttpContextUtils;
+import com.gk.study.utils.IpUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Map;
+
+@RestControllerAdvice
+public class CustomExceptionHandler {
+    private static final Logger logger = LoggerFactory.getLogger(CustomExceptionHandler.class);
+
+    @Autowired
+    private ErrorLogService service;
+
+    @ExceptionHandler(Exception.class)
+    public APIResponse handleException(Exception ex){
+        logger.error("error log======>" + ex.getMessage(), ex);
+
+        saveLog(ex);
+        return new APIResponse(ResponeCode.FAIL, ex.getMessage());
+    }
+
+    /**
+     * 保存异常日志
+     */
+    private void saveLog(Exception ex){
+        ErrorLog log = new ErrorLog();
+        //请求相关信息
+        HttpServletRequest request = HttpContextUtils.getHttpServletRequest();
+        log.setIp(IpUtils.getIpAddr(request));
+        log.setUrl(request.getRequestURI());
+        log.setMethod(request.getMethod());
+        // 请求参数
+        Map<String, String> params = HttpContextUtils.getParameterMap(request);
+        if(!params.isEmpty()){
+            //log.setRequestParams(JsonUtils.toJsonString(params));
+        }
+
+        //异常信息
+        log.setContent(Arrays.toString(ex.getStackTrace()));
+        log.setLogTime(String.valueOf(System.currentTimeMillis()));
+
+        //保存
+        service.createErrorLog(log);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\interceptor\AccessInterceptor.java
+====================
+package com.gk.study.interceptor;
+
+import com.google.gson.Gson;
+import com.gk.study.common.APIResponse;
+import com.gk.study.common.ResponeCode;
+import com.gk.study.entity.OpLog;
+import com.gk.study.entity.User;
+import com.gk.study.permission.Access;
+import com.gk.study.permission.AccessLevel;
+import com.gk.study.service.OpLogService;
+import com.gk.study.service.UserService;
+import com.gk.study.utils.IpUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+/**
+ * 该拦截器有两个用途：1.拦截request记录log 2.接口验权
+ */
+@Component
+public class AccessInterceptor extends HandlerInterceptorAdapter {
+
+    private Logger logger = LoggerFactory.getLogger(AccessInterceptor.class);
+
+    private static OpLogService service;
+
+    private static UserService userService;
+
+    @Autowired
+    public void setOpLogService( OpLogService service) {
+        // 为解决先@Component 后@Autowired失效的方案
+        AccessInterceptor.service = service;
+    }
+
+    @Autowired
+    public void setUserService( UserService userService) {
+        // 为解决先@Component 后@Autowired失效的方案
+        AccessInterceptor.userService = userService;
+    }
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
+
+        request.setAttribute("_startTime", System.currentTimeMillis());
+
+        //**********************验权代码*************************
+        if (!(handler instanceof HandlerMethod)) {
+            return true;
+        }
+        HandlerMethod handlerMethod = (HandlerMethod) handler;
+        Method method = handlerMethod.getMethod();
+        Access access = method.getAnnotation(Access.class);
+        if (access == null) {
+            // 如果注解为null, 说明不需要拦截, 直接放过
+            return true;
+        }
+
+        // 管理员
+        if(access.level().getCode() == AccessLevel.ADMIN.getCode()) {
+            String token = request.getHeader("ADMINTOKEN");
+            logger.info("token==>" + token);
+            User user = userService.getUserByToken(token);
+            if(user != null && user.getRole().equals(String.valueOf(User.AdminUser))){
+                return true;
+            }else {
+                APIResponse apiResponse = new APIResponse(ResponeCode.FAIL, "无操作权限");
+                writeResponse(response, apiResponse);
+                return false;
+            }
+        }
+
+        // 用户
+        if(access.level().getCode() == AccessLevel.LOGIN.getCode()) {
+            String token = request.getHeader("TOKEN");
+            logger.info("token==>" + token);
+            User user = userService.getUserByToken(token);
+            if(user != null && user.getRole().equals(String.valueOf(User.NormalUser))){
+                return true;
+            }else {
+                APIResponse apiResponse = new APIResponse(ResponeCode.FAIL, "未登录");
+                writeResponse(response, apiResponse);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+
+        //**********************记录log代码*************************
+        Long endTime = System.currentTimeMillis();
+        Long startTime = (Long) request.getAttribute("_startTime");
+        Long diff = (endTime - startTime);
+
+        OpLog opLog = new OpLog();
+        opLog.setReIp(IpUtils.getIpAddr(request));
+        opLog.setReMethod(request.getMethod());
+        opLog.setReUrl(request.getRequestURI());
+        opLog.setReUa(request.getHeader(HttpHeaders.USER_AGENT));
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        opLog.setReTime(formatter.format(new Date()));
+        opLog.setAccessTime(String.valueOf(diff));
+        service.createOpLog(opLog);
+    }
+
+    public void writeResponse(HttpServletResponse response, APIResponse apiResponse) throws IOException {
+        response.setStatus(200);
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        Gson gson = new Gson();
+        String jsonStr = gson.toJson(apiResponse);
+        response.getWriter().println(jsonStr);
+        response.getWriter().flush();
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\AddressMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.Address;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface AddressMapper extends BaseMapper<Address> {
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\AdMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.Ad;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface AdMapper extends BaseMapper<Ad> {
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\BannerMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.Banner;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface BannerMapper extends BaseMapper<Banner> {
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\ClassificationMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.Classification;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface ClassificationMapper extends BaseMapper<Classification> {
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\CommentMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.Comment;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+
+@Mapper
+public interface CommentMapper extends BaseMapper<Comment> {
+
+    List<Comment> getList();
+
+    List<Comment> selectThingCommentList(String thingId, String order);
+
+    List<Comment> selectUserCommentList(String userId);
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\CouponMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.Coupon;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+
+@Mapper
+public interface CouponMapper extends BaseMapper<Coupon> {
+    List<Coupon> getList();
+
+    Coupon getByCode(String code);
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\CouponReceiveMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.CouponReceive;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+@Mapper
+public interface CouponReceiveMapper extends BaseMapper<CouponReceive> {
+
+    CouponReceive getUserCoupon(@Param("userId") String userId, @Param("couponId") String couponId);
+
+    int markCouponUsed(@Param("userId") String userId, @Param("couponId") String couponId, @Param("useTime") String useTime);
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\ErrorLogMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.ErrorLog;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface ErrorLogMapper extends BaseMapper<ErrorLog> {
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\NoticeMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.Notice;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface NoticeMapper extends BaseMapper<Notice> {
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\OpLogMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.OpLog;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface OpLogMapper extends BaseMapper<OpLog> {
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\OrderMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.Order;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+
+@Mapper
+public interface OrderMapper extends BaseMapper<Order> {
+
+    List<Order> getList();
+
+    List<Order> getUserOrderList(String userId, String status);
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\OverviewMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.VisitData;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+@Mapper
+public interface OverviewMapper extends BaseMapper<Object> {
+
+    List<Object> getPopularThing();
+    List<Object> getPopularClassification();
+    List<VisitData> getWebVisitData(@Param("day") String day);
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\TagMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.Tag;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface TagMapper extends BaseMapper<Tag> {
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\ThingCollectMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.ThingCollect;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+import java.util.Map;
+
+@Mapper
+public interface ThingCollectMapper extends BaseMapper<ThingCollect> {
+
+
+    List<Map> getThingCollectList(String userId);
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\ThingMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.Thing;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface ThingMapper extends BaseMapper<Thing> {
+//    List<Thing> getList();
+//    boolean update(Thing thing);
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\ThingTagMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.ThingTag;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface ThingTagMapper extends BaseMapper<ThingTag> {
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\ThingWishMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.ThingWish;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+import java.util.Map;
+
+@Mapper
+public interface ThingWishMapper extends BaseMapper<ThingWish> {
+
+    List<Map> getThingWishList(String userId);
+}
+
+
+====================
+File: src\main\java\com\gk\study\mapper\UserMapper.java
+====================
+package com.gk.study.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gk.study.entity.User;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface UserMapper extends BaseMapper<User> {
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\permission\Access.java
+====================
+package com.gk.study.permission;
+
+import java.lang.annotation.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@Documented     // 在生成javac时显示该注解的信息
+@Inherited
+public @interface Access {
+    AccessLevel level() default AccessLevel.LOGIN; //默认为ALL
+}
+
+
+====================
+File: src\main\java\com\gk\study\permission\AccessLevel.java
+====================
+package com.gk.study.permission;
+
+public enum AccessLevel {
+
+    // 此处需与user表的role字段对应起来
+
+    LOGIN(1, "all"), // 登录用户
+    DEMO(2, "demo"), // 演示账号
+    ADMIN(3, "admin"), // 管理员
+    SUPER(4, "super"); // 超级管理员
+
+    int code;
+    String msg;
+
+    AccessLevel(int code, String msg) {
+        this.code = code;
+        this.msg = msg;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\AddressService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.Address;
+
+import java.util.List;
+
+public interface AddressService {
+    List<Address> getAddressList(String userId);
+    void createAddress(Address address);
+    void deleteAddress(String id);
+
+    void updateAddress(Address address);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\AdService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.Ad;
+
+import java.util.List;
+
+public interface AdService {
+    List<Ad> getAdList();
+    void createAd(Ad ad);
+    void deleteAd(String id);
+
+    void updateAd(Ad ad);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\BannerService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.Banner;
+
+import java.util.List;
+
+public interface BannerService {
+    List<Banner> getBannerList();
+    void createBanner(Banner banner);
+    void deleteBanner(String id);
+
+    void updateBanner(Banner banner);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\ClassificationService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.Classification;
+
+import java.util.List;
+
+public interface ClassificationService {
+    List<Classification> getClassificationList();
+    void createClassification(Classification Classification);
+    void deleteClassification(String id);
+
+    void updateClassification(Classification Classification);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\CommentService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.Comment;
+
+import java.util.List;
+
+public interface CommentService {
+    List<Comment> getCommentList();
+    void createComment(Comment comment);
+    void deleteComment(String id);
+    void updateComment(Comment comment);
+    Comment getCommentDetail(String id);
+
+    List<Comment> getThingCommentList(String thingId, String order);
+
+    List<Comment> getUserCommentList(String userId);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\CouponService.java
+====================
+package com.gk.study.service;
+
+import com.gk.study.entity.Coupon;
+
+import java.util.List;
+
+public interface CouponService {
+    List<Coupon> getCouponList();
+
+    void createCoupon(Coupon coupon);
+
+    void deleteCoupon(String id);
+
+    void updateCoupon(Coupon coupon);
+
+    Coupon getAvailableCoupon(String code);
+
+    Coupon receiveCoupon(String code, String userId);
+
+    Coupon getUserAvailableCoupon(String code, String userId);
+
+    boolean markCouponUsed(String code, String userId);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\ErrorLogService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.ErrorLog;
+
+import java.util.List;
+
+public interface ErrorLogService {
+    List<ErrorLog> getErrorLogList();
+    void createErrorLog(ErrorLog errorLog);
+    void deleteErrorLog(String id);
+    void updateErrorLog(ErrorLog errorLog);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\NoticeService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.Notice;
+
+import java.util.List;
+
+public interface NoticeService {
+    List<Notice> getNoticeList();
+    void createNotice(Notice notice);
+    void deleteNotice(String id);
+
+    void updateNotice(Notice notice);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\OpLogService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.OpLog;
+
+import java.util.List;
+
+public interface OpLogService {
+    List<OpLog> getOpLogList();
+    void createOpLog(OpLog opLog);
+    void deleteOpLog(String id);
+    void updateOpLog(OpLog opLog);
+
+    List<OpLog> getLoginLogList();
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\OrderService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.Order;
+
+import java.util.List;
+
+public interface OrderService {
+    List<Order> getOrderList();
+    void createOrder(Order order);
+    void deleteOrder(String id);
+
+    void updateOrder(Order order);
+
+    List<Order> getUserOrderList(String userId, String status);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\TagService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.Tag;
+
+import java.util.List;
+
+public interface TagService {
+    List<Tag> getTagList();
+    void createTag(Tag tag);
+    void deleteTag(String id);
+
+    void updateTag(Tag tag);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\ThingCollectService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.ThingCollect;
+
+import java.util.List;
+import java.util.Map;
+
+public interface ThingCollectService {
+    List<Map> getThingCollectList(String userId);
+    void createThingCollect(ThingCollect thingCollect);
+    void deleteThingCollect(String id);
+    ThingCollect getThingCollect(String userId, String thingId);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\ThingService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.Thing;
+
+import java.util.List;
+
+public interface ThingService {
+    List<Thing> getThingList(String keyword, String sort, String c, String tag);
+    void createThing(Thing thing);
+    void deleteThing(String id);
+
+    void updateThing(Thing thing);
+
+    Thing getThingById(String id);
+
+    void addWishCount(String thingId);
+
+    void addCollectCount(String thingId);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\ThingWishService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.ThingWish;
+
+import java.util.List;
+import java.util.Map;
+
+public interface ThingWishService {
+    List<Map> getThingWishList(String userId);
+    void createThingWish(ThingWish thingWish);
+    void deleteThingWish(String id);
+
+    ThingWish getThingWish(String userId, String thingId);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\UserService.java
+====================
+package com.gk.study.service;
+
+
+import com.gk.study.entity.User;
+
+import java.util.List;
+
+public interface UserService {
+    List<User> getUserList(String keyword);
+    User getAdminUser(User user);
+    User getNormalUser(User user);
+    void createUser(User user);
+    void deleteUser(String id);
+
+    void updateUser(User user);
+
+    User getUserByToken(String token);
+    User getUserByUserName(String username);
+
+    User getUserDetail(String userId);
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\AddressServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.entity.Address;
+import com.gk.study.mapper.AddressMapper;
+import com.gk.study.service.AddressService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> implements AddressService {
+    @Autowired
+    AddressMapper mapper;
+
+    @Override
+    public List<Address> getAddressList(String userId) {
+        QueryWrapper<Address> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId);
+        queryWrapper.orderBy(true, false, "create_time");
+        return mapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public void createAddress(Address address) {
+        System.out.println(address);
+        address.setCreateTime(String.valueOf(System.currentTimeMillis()));
+        mapper.insert(address);
+    }
+
+    @Override
+    public void deleteAddress(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateAddress(Address address) {
+        mapper.updateById(address);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\AdServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.mapper.AdMapper;
+import com.gk.study.service.AdService;
+import com.gk.study.entity.Ad;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class AdServiceImpl extends ServiceImpl<AdMapper, Ad> implements AdService {
+    @Autowired
+    AdMapper mapper;
+
+    @Override
+    public List<Ad> getAdList() {
+        return mapper.selectList(new QueryWrapper<>());
+    }
+
+    @Override
+    public void createAd(Ad ad) {
+        System.out.println(ad);
+        ad.setCreateTime(String.valueOf(System.currentTimeMillis()));
+        mapper.insert(ad);
+    }
+
+    @Override
+    public void deleteAd(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateAd(Ad ad) {
+        mapper.updateById(ad);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\BannerServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.service.BannerService;
+import com.gk.study.entity.Banner;
+import com.gk.study.mapper.BannerMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class BannerServiceImpl extends ServiceImpl<BannerMapper, Banner> implements BannerService {
+    @Autowired
+    BannerMapper mapper;
+
+    @Override
+    public List<Banner> getBannerList() {
+        return mapper.selectList(new QueryWrapper<>());
+    }
+
+    @Override
+    public void createBanner(Banner banner) {
+        System.out.println(banner);
+        banner.setCreateTime(String.valueOf(System.currentTimeMillis()));
+        mapper.insert(banner);
+    }
+
+    @Override
+    public void deleteBanner(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateBanner(Banner banner) {
+        mapper.updateById(banner);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\ClassificationServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.mapper.ClassificationMapper;
+import com.gk.study.entity.Classification;
+import com.gk.study.service.ClassificationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ClassificationServiceImpl extends ServiceImpl<ClassificationMapper, Classification> implements ClassificationService {
+
+    @Autowired
+    ClassificationMapper mapper;
+
+    @Override
+    public List<Classification> getClassificationList() {
+        return mapper.selectList(new QueryWrapper<>());
+    }
+
+    @Override
+    public void createClassification(Classification classification) {
+        System.out.println(classification);
+        classification.setCreateTime(String.valueOf(System.currentTimeMillis()));
+        mapper.insert(classification);
+    }
+
+    @Override
+    public void deleteClassification(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateClassification(Classification classification) {
+        mapper.updateById(classification);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\CommentServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.entity.Comment;
+import com.gk.study.mapper.CommentMapper;
+import com.gk.study.service.CommentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
+    @Autowired
+    CommentMapper mapper;
+
+    @Override
+    public List<Comment> getCommentList() {
+        return mapper.getList();
+    }
+
+    @Override
+    public void createComment(Comment comment) {
+        System.out.println(comment);
+        comment.setCommentTime(String.valueOf(System.currentTimeMillis()));
+        mapper.insert(comment);
+    }
+
+    @Override
+    public void deleteComment(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateComment(Comment comment) {
+        mapper.updateById(comment);
+    }
+
+    @Override
+    public Comment getCommentDetail(String id) {
+        return mapper.selectById(id);
+    }
+
+    @Override
+    public List<Comment> getThingCommentList(String thingId, String order) {
+        return mapper.selectThingCommentList(thingId, order);
+    }
+
+    @Override
+    public List<Comment> getUserCommentList(String userId) {
+        return mapper.selectUserCommentList(userId);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\CouponServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.entity.Coupon;
+import com.gk.study.entity.CouponReceive;
+import com.gk.study.mapper.CouponMapper;
+import com.gk.study.mapper.CouponReceiveMapper;
+import com.gk.study.service.CouponService;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> implements CouponService {
+    @Autowired
+    CouponMapper mapper;
+
+    @Autowired
+    CouponReceiveMapper couponReceiveMapper;
+
+    @Override
+    public List<Coupon> getCouponList() {
+        return mapper.getList();
+    }
+
+    @Override
+    public void createCoupon(Coupon coupon) {
+        coupon.setCreateTime(String.valueOf(System.currentTimeMillis()));
+        if (StringUtils.isBlank(coupon.getStatus())) {
+            coupon.setStatus("1");
+        }
+        mapper.insert(coupon);
+    }
+
+    @Override
+    public void deleteCoupon(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateCoupon(Coupon coupon) {
+        mapper.updateById(coupon);
+    }
+
+    @Override
+    public Coupon getAvailableCoupon(String code) {
+        if (StringUtils.isBlank(code)) {
+            return null;
+        }
+        Coupon coupon = mapper.getByCode(code);
+        if (coupon == null) {
+            return null;
+        }
+        if (!"1".equals(coupon.getStatus())) {
+            return null;
+        }
+        if (StringUtils.isNotBlank(coupon.getExpireTime())) {
+            try {
+                long expireTime = Long.parseLong(coupon.getExpireTime());
+                if (System.currentTimeMillis() > expireTime) {
+                    return null;
+                }
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return coupon;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Coupon receiveCoupon(String code, String userId) {
+        if (StringUtils.isBlank(userId)) {
+            return null;
+        }
+        Coupon coupon = getAvailableCoupon(code);
+        if (coupon == null) {
+            return null;
+        }
+        CouponReceive receive = couponReceiveMapper.getUserCoupon(userId, String.valueOf(coupon.getId()));
+        if (receive != null) {
+            if ("1".equals(receive.getStatus())) {
+                return coupon;
+            } else {
+                return null;
+            }
+        }
+        CouponReceive couponReceive = new CouponReceive();
+        couponReceive.setCouponId(String.valueOf(coupon.getId()));
+        couponReceive.setUserId(userId);
+        couponReceive.setReceiveTime(String.valueOf(System.currentTimeMillis()));
+        couponReceive.setStatus("1");
+        try {
+            couponReceiveMapper.insert(couponReceive);
+            return coupon;
+        } catch (DuplicateKeyException e) {
+            CouponReceive existing = couponReceiveMapper.getUserCoupon(userId, String.valueOf(coupon.getId()));
+            if (existing != null && "1".equals(existing.getStatus())) {
+                return coupon;
+            }
+            return null;
+        }
+    }
+
+    @Override
+    public Coupon getUserAvailableCoupon(String code, String userId) {
+        if (StringUtils.isBlank(userId)) {
+            return null;
+        }
+        Coupon coupon = getAvailableCoupon(code);
+        if (coupon == null) {
+            return null;
+        }
+        CouponReceive receive = couponReceiveMapper.getUserCoupon(userId, String.valueOf(coupon.getId()));
+        if (receive == null) {
+            return null;
+        }
+        if (!"1".equals(receive.getStatus())) {
+            return null;
+        }
+        return coupon;
+    }
+
+    @Override
+    public boolean markCouponUsed(String code, String userId) {
+        if (StringUtils.isBlank(userId)) {
+            return false;
+        }
+        Coupon coupon = getAvailableCoupon(code);
+        if (coupon == null) {
+            return false;
+        }
+        CouponReceive receive = couponReceiveMapper.getUserCoupon(userId, String.valueOf(coupon.getId()));
+        if (receive == null) {
+            return false;
+        }
+        if (!"1".equals(receive.getStatus())) {
+            return false;
+        }
+        int updated = couponReceiveMapper.markCouponUsed(userId, String.valueOf(coupon.getId()), String.valueOf(System.currentTimeMillis()));
+        return updated > 0;
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\ErrorLogServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.entity.ErrorLog;
+import com.gk.study.mapper.ErrorLogMapper;
+import com.gk.study.service.ErrorLogService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ErrorLogServiceImpl extends ServiceImpl<ErrorLogMapper, ErrorLog> implements ErrorLogService {
+    @Autowired
+    ErrorLogMapper mapper;
+
+    @Override
+    public List<ErrorLog> getErrorLogList() {
+        return mapper.selectList(new QueryWrapper<>());
+    }
+
+    @Override
+    public void createErrorLog(ErrorLog errorLog) {
+        mapper.insert(errorLog);
+    }
+
+    @Override
+    public void deleteErrorLog(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateErrorLog(ErrorLog errorLog) {
+        mapper.updateById(errorLog);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\NoticeServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.entity.Notice;
+import com.gk.study.mapper.NoticeMapper;
+import com.gk.study.service.NoticeService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class NoticeServiceImpl extends ServiceImpl<NoticeMapper, Notice> implements NoticeService {
+    @Autowired
+    NoticeMapper mapper;
+
+    @Override
+    public List<Notice> getNoticeList() {
+        return mapper.selectList(new QueryWrapper<>());
+    }
+
+    @Override
+    public void createNotice(Notice notice) {
+        System.out.println(notice);
+        notice.setCreateTime(String.valueOf(System.currentTimeMillis()));
+        mapper.insert(notice);
+    }
+
+    @Override
+    public void deleteNotice(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateNotice(Notice notice) {
+        mapper.updateById(notice);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\OpLogServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.entity.OpLog;
+import com.gk.study.service.OpLogService;
+import com.gk.study.mapper.OpLogMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class OpLogServiceImpl extends ServiceImpl<OpLogMapper, OpLog> implements OpLogService {
+    @Autowired
+    OpLogMapper mapper;
+
+    @Override
+    public List<OpLog> getOpLogList() {
+        QueryWrapper<OpLog> queryWrapper = new QueryWrapper();
+        queryWrapper.orderBy(true, false, "re_time");
+        queryWrapper.last("limit 0, 1000"); // 前1000条
+        return mapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public void createOpLog(OpLog opLog) {
+        mapper.insert(opLog);
+    }
+
+    @Override
+    public void deleteOpLog(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateOpLog(OpLog opLog) {
+        mapper.updateById(opLog);
+    }
+
+    @Override
+    public List<OpLog> getLoginLogList() {
+        QueryWrapper<OpLog> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("re_url", "/api/user/userLogin");
+        queryWrapper.orderBy(true, false, "re_time");
+        queryWrapper.last("limit 0, 1000"); // 前1000条
+        return mapper.selectList(queryWrapper);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\OrderServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.entity.Coupon;
+import com.gk.study.entity.Order;
+import com.gk.study.mapper.OrderMapper;
+import com.gk.study.service.CouponService;
+import com.gk.study.service.OrderService;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+@Service
+public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
+    @Autowired
+    OrderMapper mapper;
+
+    @Autowired
+    CouponService couponService;
+
+    private final Gson gson = new Gson();
+
+    @Override
+    public List<Order> getOrderList() {
+        return mapper.getList();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void createOrder(Order order) {
+        long ct = System.currentTimeMillis();
+        order.setOrderTime(String.valueOf(ct));
+        order.setOrderNumber(String.valueOf(ct));
+        order.setStatus("1");
+        BigDecimal originAmount = calculateAmount(order.getGwc());
+        Coupon coupon = StringUtils.isNotBlank(order.getCouponCode())
+                ? couponService.getUserAvailableCoupon(order.getCouponCode(), order.getUserId())
+                : null;
+        BigDecimal discount = calculateDiscount(coupon, originAmount);
+        if (discount.compareTo(BigDecimal.ZERO) > 0) {
+            boolean marked = couponService.markCouponUsed(order.getCouponCode(), order.getUserId());
+            if (!marked) {
+                discount = BigDecimal.ZERO;
+            }
+        }
+        BigDecimal finalAmount = originAmount.subtract(discount);
+        order.setAmount(finalAmount.toPlainString());
+        order.setDiscountAmount(discount.toPlainString());
+        mapper.insert(order);
+    }
+
+    @Override
+    public void deleteOrder(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateOrder(Order order) {
+        mapper.updateById(order);
+    }
+
+    @Override
+    public List<Order> getUserOrderList(String userId, String status) {
+        return mapper.getUserOrderList(userId, status);
+//        QueryWrapper<Order> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("user_id", userId);
+//        if (StringUtils.isNotBlank(status)) {
+//            queryWrapper.eq("status", status);
+//        }
+//        queryWrapper.orderBy(true, false, "order_time");
+//        return mapper.selectList(queryWrapper);
+    }
+
+    private BigDecimal calculateAmount(String gwcText) {
+        if (StringUtils.isBlank(gwcText)) {
+            return BigDecimal.ZERO;
+        }
+        try {
+            JsonObject root = gson.fromJson(gwcText, JsonObject.class);
+            JsonArray array = root.getAsJsonArray("gwc");
+            BigDecimal amount = BigDecimal.ZERO;
+            for (JsonElement element : array) {
+                JsonObject item = element.getAsJsonObject();
+                BigDecimal price = new BigDecimal(item.get("price").getAsString());
+                int count = item.get("count").getAsInt();
+                amount = amount.add(price.multiply(BigDecimal.valueOf(count)));
+            }
+            return amount;
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
+        }
+    }
+
+    private BigDecimal calculateDiscount(Coupon coupon, BigDecimal originAmount) {
+        if (coupon == null) {
+            return BigDecimal.ZERO;
+        }
+        try {
+            BigDecimal discount = new BigDecimal(coupon.getDiscountAmount());
+            if (discount.compareTo(originAmount) > 0) {
+                return originAmount;
+            }
+            return discount;
+        } catch (Exception e) {
+            return BigDecimal.ZERO;
+        }
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\TagServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.mapper.TagMapper;
+import com.gk.study.entity.Tag;
+import com.gk.study.service.TagService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class TagServiceImpl extends ServiceImpl<TagMapper, Tag> implements TagService {
+    @Autowired
+    TagMapper mapper;
+
+    @Override
+    public List<Tag> getTagList() {
+        return mapper.selectList(new QueryWrapper<>());
+    }
+
+    @Override
+    public void createTag(Tag tag) {
+        System.out.println(tag);
+        tag.setCreateTime(String.valueOf(System.currentTimeMillis()));
+        mapper.insert(tag);
+    }
+
+    @Override
+    public void deleteTag(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateTag(Tag tag) {
+        mapper.updateById(tag);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\ThingCollectServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.mapper.ThingCollectMapper;
+import com.gk.study.service.ThingCollectService;
+import com.gk.study.entity.ThingCollect;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+class ThingCollectServiceImpl extends ServiceImpl<ThingCollectMapper, ThingCollect> implements ThingCollectService {
+    @Autowired
+    ThingCollectMapper mapper;
+
+    @Override
+    public List<Map> getThingCollectList(String userId) {
+        return mapper.getThingCollectList(userId);
+    }
+
+    @Override
+    public void createThingCollect(ThingCollect thingCollect) {
+        mapper.insert(thingCollect);;
+    }
+
+    @Override
+    public void deleteThingCollect(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public ThingCollect getThingCollect(String userId, String thingId) {
+        QueryWrapper<ThingCollect> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("thing_id", thingId)
+                .eq("user_id", userId);
+        return mapper.selectOne(queryWrapper);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\ThingServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.entity.Thing;
+import com.gk.study.entity.ThingTag;
+import com.gk.study.mapper.ThingMapper;
+import com.gk.study.mapper.ThingTagMapper;
+import com.gk.study.service.ThingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+public class ThingServiceImpl extends ServiceImpl<ThingMapper, Thing> implements ThingService {
+    @Autowired
+    ThingMapper mapper;
+
+    @Autowired
+    ThingTagMapper thingTagMapper;
+
+    @Override
+    public List<Thing> getThingList(String keyword, String sort, String c, String tag) {
+        QueryWrapper<Thing> queryWrapper = new QueryWrapper<>();
+
+        // 搜索
+        queryWrapper.like(StringUtils.isNotBlank(keyword), "title", keyword);
+
+        // 排序
+        if (StringUtils.isNotBlank(sort)) {
+            if (sort.equals("recent")) {
+                queryWrapper.orderBy(true, false, "create_time");
+            } else if (sort.equals("hot") || sort.equals("recommend")) {
+                queryWrapper.orderBy(true, false, "pv");
+            }
+        }else {
+            queryWrapper.orderBy(true, false, "create_time");
+        }
+
+        // 根据分类筛选
+        if (StringUtils.isNotBlank(c) && !c.equals("-1")) {
+            queryWrapper.eq(true, "classification_id", c);
+        }
+
+        List<Thing> things = mapper.selectList(queryWrapper);
+
+        // tag筛选
+        if (StringUtils.isNotBlank(tag)) {
+            List<Thing> tThings = new ArrayList<>();
+            QueryWrapper<ThingTag> thingTagQueryWrapper = new QueryWrapper<>();
+            thingTagQueryWrapper.eq("tag_id", tag);
+            List<ThingTag> thingTagList = thingTagMapper.selectList(thingTagQueryWrapper);
+            for (Thing thing : things) {
+                for (ThingTag thingTag : thingTagList) {
+                    if (thing.getId().equals(thingTag.getThingId())) {
+                        tThings.add(thing);
+                    }
+                }
+            }
+            things.clear();
+            things.addAll(tThings);
+        }
+
+        // 附加tag
+        for (Thing thing : things) {
+            QueryWrapper<ThingTag> thingTagQueryWrapper = new QueryWrapper<>();
+            thingTagQueryWrapper.lambda().eq(ThingTag::getThingId, thing.getId());
+            List<ThingTag> thingTags = thingTagMapper.selectList(thingTagQueryWrapper);
+            List<Long> tags = thingTags.stream().map(ThingTag::getTagId).collect(Collectors.toList());
+            thing.setTags(tags);
+        }
+        return things;
+    }
+
+    @Override
+    public void createThing(Thing thing) {
+        System.out.println(thing);
+        thing.setCreateTime(String.valueOf(System.currentTimeMillis()));
+
+        if (thing.getPv() == null) {
+            thing.setPv("0");
+        }
+        if (thing.getScore() == null) {
+            thing.setScore("0");
+        }
+        if (thing.getWishCount() == null) {
+            thing.setWishCount("0");
+        }
+        mapper.insert(thing);
+        // 更新tag
+        setThingTags(thing);
+    }
+
+    @Override
+    public void deleteThing(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public void updateThing(Thing thing) {
+
+        // 更新tag
+        setThingTags(thing);
+
+        mapper.updateById(thing);
+    }
+
+    @Override
+    public Thing getThingById(String id) {
+        return mapper.selectById(id);
+    }
+
+    // 心愿数加1
+    @Override
+    public void addWishCount(String thingId) {
+        Thing thing = mapper.selectById(thingId);
+        thing.setWishCount(String.valueOf(Integer.parseInt(thing.getWishCount()) + 1));
+        mapper.updateById(thing);
+    }
+
+    // 收藏数加1
+    @Override
+    public void addCollectCount(String thingId) {
+        Thing thing = mapper.selectById(thingId);
+        thing.setCollectCount(String.valueOf(Integer.parseInt(thing.getCollectCount()) + 1));
+        mapper.updateById(thing);
+    }
+
+    public void setThingTags(Thing thing) {
+        // 删除tag
+        Map<String, Object> map = new HashMap<>();
+        map.put("thing_id", thing.getId());
+        thingTagMapper.deleteByMap(map);
+        // 新增tag
+        if (thing.getTags() != null) {
+            for (Long tag : thing.getTags()) {
+                ThingTag thingTag = new ThingTag();
+                thingTag.setThingId(thing.getId());
+                thingTag.setTagId(tag);
+                thingTagMapper.insert(thingTag);
+            }
+        }
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\ThingWishServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.mapper.ThingWishMapper;
+import com.gk.study.service.ThingWishService;
+import com.gk.study.entity.ThingWish;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+@Service
+class ThingWishServiceImpl extends ServiceImpl<ThingWishMapper, ThingWish> implements ThingWishService {
+    @Autowired
+    ThingWishMapper mapper;
+
+    @Override
+    public List<Map> getThingWishList(String userId) {
+        return mapper.getThingWishList(userId);
+    }
+
+    @Override
+    public void createThingWish(ThingWish thingWish) {
+        mapper.insert(thingWish);;
+    }
+
+    @Override
+    public void deleteThingWish(String id) {
+        mapper.deleteById(id);
+    }
+
+    @Override
+    public ThingWish getThingWish(String userId, String thingId) {
+        QueryWrapper<ThingWish> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("thing_id", thingId)
+                .eq("user_id", userId);
+        return mapper.selectOne(queryWrapper);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\service\impl\UserServiceImpl.java
+====================
+package com.gk.study.service.impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.gk.study.service.UserService;
+import com.gk.study.entity.User;
+import com.gk.study.mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    @Autowired
+    UserMapper userMapper;
+
+    @Override
+    public List<User> getUserList(String keyword) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper();
+        if(StringUtils.isNotBlank(keyword)){
+            // like查询
+            queryWrapper.like("username", keyword);
+        }
+        queryWrapper.orderBy(true, false, "create_time");
+        return userMapper.selectList(queryWrapper);
+    }
+
+    @Override
+    public User getAdminUser(User user) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("username", user.getUsername());
+        queryWrapper.eq("password", user.getPassword());
+        queryWrapper.gt("role", "1");
+        return userMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public User getNormalUser(User user) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("username", user.getUsername());
+        queryWrapper.eq("password", user.getPassword());
+        queryWrapper.eq("role", "1");
+        return userMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public void createUser(User user) {
+        userMapper.insert(user);
+    }
+
+    @Override
+    public void deleteUser(String id) {
+        userMapper.deleteById(id);
+    }
+
+    @Override
+    public void updateUser(User user) {
+        userMapper.updateById(user);
+    }
+
+    @Override
+    public User getUserByToken(String token) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("token", token);
+        return userMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public User getUserByUserName(String username) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("username", username);
+        return userMapper.selectOne(queryWrapper);
+    }
+
+    @Override
+    public User getUserDetail(String userId) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("id", userId);
+        return userMapper.selectOne(queryWrapper);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\utils\HttpContextUtils.java
+====================
+package com.gk.study.utils;
+
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+
+public class HttpContextUtils {
+
+    public static HttpServletRequest getHttpServletRequest() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if(requestAttributes == null){
+            return null;
+        }
+
+        return ((ServletRequestAttributes) requestAttributes).getRequest();
+    }
+
+    public static Map<String, String> getParameterMap(HttpServletRequest request) {
+        Enumeration<String> parameters = request.getParameterNames();
+
+        Map<String, String> params = new HashMap<>();
+        while (parameters.hasMoreElements()) {
+            String parameter = parameters.nextElement();
+            String value = request.getParameter(parameter);
+            if (StringUtils.isNotBlank(value)) {
+                params.put(parameter, value);
+            }
+        }
+
+        return params;
+    }
+
+    public static String getDomain(){
+        HttpServletRequest request = getHttpServletRequest();
+        StringBuffer url = request.getRequestURL();
+        return url.delete(url.length() - request.getRequestURI().length(), url.length()).toString();
+    }
+
+    public static String getOrigin(){
+        HttpServletRequest request = getHttpServletRequest();
+        return request.getHeader(HttpHeaders.ORIGIN);
+    }
+}
+
+
+====================
+File: src\main\java\com\gk\study\utils\IpUtils.java
+====================
+package com.gk.study.utils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
+
+public class IpUtils {
+    private static Logger logger = LoggerFactory.getLogger(IpUtils.class);
+
+    /**
+     * 获取IP地址
+     *
+     * 使用Nginx等反向代理软件， 则不能通过request.getRemoteAddr()获取IP地址
+     * 如果使用了多级反向代理的话，X-Forwarded-For的值并不止一个，而是一串IP地址，X-Forwarded-For中第一个非unknown的有效IP字符串，则为真实IP地址
+     */
+    public static String getIpAddr(HttpServletRequest request) {
+        String unknown = "unknown";
+        String ip = null;
+        try {
+            ip = request.getHeader("x-forwarded-for");
+            if (StringUtils.isEmpty(ip) || unknown.equalsIgnoreCase(ip)) {
+                ip = request.getHeader("Proxy-Client-IP");
+            }
+            if (StringUtils.isEmpty(ip) || ip.length() == 0 || unknown.equalsIgnoreCase(ip)) {
+                ip = request.getHeader("WL-Proxy-Client-IP");
+            }
+            if (StringUtils.isEmpty(ip) || unknown.equalsIgnoreCase(ip)) {
+                ip = request.getHeader("HTTP_CLIENT_IP");
+            }
+            if (StringUtils.isEmpty(ip) || unknown.equalsIgnoreCase(ip)) {
+                ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+            }
+            if (StringUtils.isEmpty(ip) || unknown.equalsIgnoreCase(ip)) {
+                ip = request.getRemoteAddr();
+            }
+        } catch (Exception e) {
+            logger.error("IPUtils ERROR ", e);
+        }
+
+        return ip;
+    }
+
+}
+
+
+====================
+File: src\main\java\com\gk\study\utils\JsonUtils.java
+====================
+package com.gk.study.utils;
+
+import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class JsonUtils {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    public static String toJsonString(Object object) {
+        try {
+            return objectMapper.writeValueAsString(object);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T parseObject(String text, Class<T> clazz) {
+        if (StringUtils.isEmpty(text)) {
+            return null;
+        }
+        try {
+            return objectMapper.readValue(text, clazz);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T parseObject(byte[] bytes, Class<T> clazz) {
+        if (bytes == null || bytes.length <= 0) {
+            return null;
+        }
+        try {
+            return objectMapper.readValue(bytes, clazz);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T parseObject(String text, TypeReference<T> typeReference) {
+        try {
+            return objectMapper.readValue(text, typeReference);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> List<T> parseArray(String text, Class<T> clazz) {
+        if (StringUtils.isEmpty(text)) {
+            return new ArrayList<>();
+        }
+        try {
+            return objectMapper.readValue(text, objectMapper.getTypeFactory().constructCollectionType(List.class, clazz));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+}
+
+
+
+
+====================
+File: src\main\resources\application.yml
+====================
+server:
+  port: 9100
+  servlet:
+    context-path: /api
+
+# =============================
+# 自定义配置（路径要写成双斜杠）
+# =============================
+BASE_LOCATION: D:\\aliyun_workspace\\java_food   # ← 必须改成双斜杠 \\
+
+DB_NAME: java_food   # ← 你自己的数据库名（必须在 MySQL 里存在）
+
+File:
+  uploadPath: ${BASE_LOCATION}\\server\\upload
+
+# =============================
+# 数据库配置（你必须填写账号密码）
+# =============================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/${DB_NAME}?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+
+    username: root     # ← 你自己填，比如 root
+    password: 123456       # ← 你自己填，比如 123456
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+
+====================
+File: src\main\resources\logback-spring.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+scan：当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true。
+scanPeriod：设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒当scan为true时，此属性生效。默认的时间间隔为1分钟。
+debug：当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。
+-->
+<configuration scan="false" scanPeriod="60 seconds" debug="false">
+    <!-- 定义日志的根目录 -->
+    <property name="LOG_HOME" value="my-log" />
+    <!-- 定义日志文件名称 -->
+    <property name="appName" value="springboot-demo"></property>
+    <!-- ch.qos.logback.core.ConsoleAppender 表示控制台输出 -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <!--
+        日志输出格式：
+            %d表示日期时间，
+            %thread表示线程名，
+            %-5level：级别从左显示5个字符宽度
+            %logger{50} 表示logger名字最长50个字符，否则按照句点分割。
+            %msg：日志消息，
+            %n是换行符
+        -->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!-- 滚动记录文件，先将日志记录到指定文件，当符合某个条件时，将日志记录到其他文件 -->
+    <appender name="appLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 指定日志文件的名称 -->
+        <file>${LOG_HOME}/${appName}.log</file>
+        <!--
+        当发生滚动时，决定 RollingFileAppender 的行为，涉及文件移动和重命名
+        TimeBasedRollingPolicy： 最常用的滚动策略，它根据时间来制定滚动策略，既负责滚动也负责出发滚动。
+        -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--
+            滚动时产生的文件的存放位置及文件名称 %d{yyyy-MM-dd}：按天进行日志滚动
+            %i：当文件大小超过maxFileSize时，按照i进行文件滚动
+            -->
+            <fileNamePattern>${LOG_HOME}/${appName}-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <!--
+            可选节点，控制保留的归档文件的最大数量，超出数量就删除旧文件。假设设置每天滚动，
+            且maxHistory是365，则只保存最近365天的文件，删除之前的旧文件。注意，删除旧文件是，
+            那些为了归档而创建的目录也会被删除。
+            -->
+            <MaxHistory>365</MaxHistory>
+            <!--
+            当日志文件超过maxFileSize指定的大小是，根据上面提到的%i进行日志文件滚动 注意此处配置SizeBasedTriggeringPolicy是无法实现按文件大小进行滚动的，必须配置timeBasedFileNamingAndTriggeringPolicy
+            -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <!-- 日志输出格式： -->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [ %thread ] - [ %-5level ] [ %logger{50} : %line ] - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!--
+        logger主要用于存放日志对象，也可以定义日志类型、级别
+        name：表示匹配的logger类型前缀，也就是包的前半部分
+        level：要记录的日志级别，包括 TRACE < DEBUG < INFO < WARN < ERROR
+        additivity：作用在于children-logger是否使用 rootLogger配置的appender进行输出，
+        false：表示只用当前logger的appender-ref，true：
+        表示当前logger的appender-ref和rootLogger的appender-ref都有效
+    -->
+    <!-- hibernate logger -->
+    <logger name="com.atguigu" level="debug" />
+    <!-- Spring framework logger -->
+    <logger name="org.springframework" level="debug" additivity="false"></logger>
+
+
+
+    <!--
+    root与logger是父子关系，没有特别定义则默认为root，任何一个类只会和一个logger对应，
+    要么是定义的logger，要么是root，判断的关键在于找到这个logger，然后判断这个logger的appender和level。
+    -->
+    <root level="info">
+        <appender-ref ref="stdout" />
+        <appender-ref ref="appLogAppender" />
+    </root>
+</configuration>
+
+
+====================
+File: src\main\resources\mapper\CommentMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.CommentMapper">
+
+    <select id="getList" resultType="com.gk.study.entity.Comment">
+        select A.*, B.username, C.title
+        from b_comment as A
+        join b_user as B on (A.user_id=B.id)
+        join b_thing as C on (A.thing_id=C.id)
+        order by A.comment_time desc;
+    </select>
+
+    <select id="selectThingCommentList" parameterType="map" resultType="com.gk.study.entity.Comment">
+        select A.*, B.username, C.title
+        from b_comment as A
+                 join b_user as B on (A.user_id=B.id)
+                 join b_thing as C on (A.thing_id=C.id)
+        <if test="thingId != null">
+            where A.thing_id=#{thingId}
+        </if>
+        <if test="order == 'recent'">
+            order by A.comment_time desc;
+        </if>
+        <if test="order == 'hot'">
+            order by A.like_count desc;
+        </if>
+    </select>
+
+    <select id="selectUserCommentList" parameterType="map" resultType="com.gk.study.entity.Comment">
+        select A.*, B.username, C.title, C.cover
+        from b_comment as A
+        join b_user as B on (A.user_id=B.id)
+        join b_thing as C on (A.thing_id=C.id)
+        <if test="userId != null">
+            where A.user_id=#{userId}
+        </if>
+            order by A.comment_time desc;
+    </select>
+
+
+</mapper>
+
+
+====================
+File: src\main\resources\mapper\CouponMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.CouponMapper">
+
+    <select id="getList" resultType="com.gk.study.entity.Coupon">
+        select *
+        from b_coupon
+        order by create_time desc;
+    </select>
+
+    <select id="getByCode" resultType="com.gk.study.entity.Coupon">
+        select *
+        from b_coupon
+        where code = #{code}
+        limit 1;
+    </select>
+
+</mapper>
+
+
+====================
+File: src\main\resources\mapper\CouponReceiveMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.CouponReceiveMapper">
+
+    <select id="getUserCoupon" resultType="com.gk.study.entity.CouponReceive">
+        select *
+        from b_coupon_receive
+        where user_id = #{userId}
+          and coupon_id = #{couponId}
+        limit 1;
+    </select>
+
+    <update id="markCouponUsed">
+        update b_coupon_receive
+        set status   = '2',
+            use_time = #{useTime}
+        where user_id = #{userId}
+          and coupon_id = #{couponId}
+          and status = '1'
+    </update>
+
+</mapper>
+
+
+====================
+File: src\main\resources\mapper\OrderMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.OrderMapper">
+
+    <select id="getList" resultType="com.gk.study.entity.Order">
+        select A.*, B.username
+        from b_order as A
+        join b_user as B on (A.user_id=B.id)
+        order by A.order_time desc;
+    </select>
+
+    <select id="getUserOrderList" resultType="com.gk.study.entity.Order">
+        select A.*, B.username
+        from b_order as A
+                 join b_user as B on (A.user_id=B.id)
+        where 2>1
+        <if test="userId != null">
+            and A.user_id=#{userId}
+        </if>
+        <if test="status != null and status != ''">
+            and A.status=#{status}
+        </if>
+        order by A.order_time desc;
+    </select>
+
+</mapper>
+
+
+====================
+File: src\main\resources\mapper\OverviewMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.OverviewMapper">
+
+    <select id="getPopularThing" resultType="java.util.HashMap">
+        select A.thing_id, B.title, count(A.thing_id) as count
+        from b_order A join b_thing B on A.thing_id=B.id
+        group by A.thing_id
+        order by count desc;
+    </select>
+
+    <select id="getPopularClassification" resultType="java.util.HashMap">
+        select B.title, count(B.title) as count
+        from b_thing A join B_classification B on A.classification_id = B.id
+        group by B.title
+        order by count desc limit 5;
+    </select>
+
+    <select id="getWebVisitData" parameterType="java.lang.String" resultType="com.gk.study.entity.VisitData">
+        select re_ip, count(re_ip) as count
+        from b_op_log
+        <where>
+        <if test="day != null">
+            re_time like CONCAT('%',#{day},'%')
+        </if>
+        </where>
+        group by re_ip
+    </select>
+</mapper>
+
+
+====================
+File: src\main\resources\mapper\ThingCollectMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.ThingCollectMapper">
+
+    <select id="getThingCollectList" parameterType="map" resultType="java.util.Map">
+        select A.*, B.title, B.cover
+        from b_thing_collect  A
+        join b_thing  B on (A.thing_id=B.id)
+        where A.user_id=#{userId}
+    </select>
+
+</mapper>
+
+
+====================
+File: src\main\resources\mapper\ThingMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.ThingMapper">
+
+
+    <select id="getList" resultType="com.gk.study.entity.Thing">
+        select * from b_thing;
+    </select>
+
+
+</mapper>
+
+
+====================
+File: src\main\resources\mapper\ThingWishMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.ThingWishMapper">
+
+    <select id="getThingWishList" parameterType="map" resultType="java.util.Map">
+        select A.*, B.title, B.cover
+        from b_thing_wish  A
+        join b_thing  B on (A.thing_id=B.id)
+        where A.user_id=#{userId}
+    </select>
+
+</mapper>
+
+
+====================
+File: src\main\resources\mapper\UserMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.UserMapper">
+
+
+</mapper>
+
+
+====================
+File: target\classes\application.yml
+====================
+server:
+  port: 9100
+  servlet:
+    context-path: /api
+
+# =============================
+# 自定义配置（路径要写成双斜杠）
+# =============================
+BASE_LOCATION: D:\\aliyun_workspace\\java_food   # ← 必须改成双斜杠 \\
+
+DB_NAME: java_food   # ← 你自己的数据库名（必须在 MySQL 里存在）
+
+File:
+  uploadPath: ${BASE_LOCATION}\\server\\upload
+
+# =============================
+# 数据库配置（你必须填写账号密码）
+# =============================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/${DB_NAME}?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+
+    username: root     # ← 你自己填，比如 root
+    password: 123456       # ← 你自己填，比如 123456
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
+
+
+====================
+File: target\classes\logback-spring.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+scan：当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true。
+scanPeriod：设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒当scan为true时，此属性生效。默认的时间间隔为1分钟。
+debug：当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。
+-->
+<configuration scan="false" scanPeriod="60 seconds" debug="false">
+    <!-- 定义日志的根目录 -->
+    <property name="LOG_HOME" value="my-log" />
+    <!-- 定义日志文件名称 -->
+    <property name="appName" value="springboot-demo"></property>
+    <!-- ch.qos.logback.core.ConsoleAppender 表示控制台输出 -->
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <!--
+        日志输出格式：
+            %d表示日期时间，
+            %thread表示线程名，
+            %-5level：级别从左显示5个字符宽度
+            %logger{50} 表示logger名字最长50个字符，否则按照句点分割。
+            %msg：日志消息，
+            %n是换行符
+        -->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!-- 滚动记录文件，先将日志记录到指定文件，当符合某个条件时，将日志记录到其他文件 -->
+    <appender name="appLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 指定日志文件的名称 -->
+        <file>${LOG_HOME}/${appName}.log</file>
+        <!--
+        当发生滚动时，决定 RollingFileAppender 的行为，涉及文件移动和重命名
+        TimeBasedRollingPolicy： 最常用的滚动策略，它根据时间来制定滚动策略，既负责滚动也负责出发滚动。
+        -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--
+            滚动时产生的文件的存放位置及文件名称 %d{yyyy-MM-dd}：按天进行日志滚动
+            %i：当文件大小超过maxFileSize时，按照i进行文件滚动
+            -->
+            <fileNamePattern>${LOG_HOME}/${appName}-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <!--
+            可选节点，控制保留的归档文件的最大数量，超出数量就删除旧文件。假设设置每天滚动，
+            且maxHistory是365，则只保存最近365天的文件，删除之前的旧文件。注意，删除旧文件是，
+            那些为了归档而创建的目录也会被删除。
+            -->
+            <MaxHistory>365</MaxHistory>
+            <!--
+            当日志文件超过maxFileSize指定的大小是，根据上面提到的%i进行日志文件滚动 注意此处配置SizeBasedTriggeringPolicy是无法实现按文件大小进行滚动的，必须配置timeBasedFileNamingAndTriggeringPolicy
+            -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <!-- 日志输出格式： -->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [ %thread ] - [ %-5level ] [ %logger{50} : %line ] - %msg%n</pattern>
+        </layout>
+    </appender>
+
+    <!--
+        logger主要用于存放日志对象，也可以定义日志类型、级别
+        name：表示匹配的logger类型前缀，也就是包的前半部分
+        level：要记录的日志级别，包括 TRACE < DEBUG < INFO < WARN < ERROR
+        additivity：作用在于children-logger是否使用 rootLogger配置的appender进行输出，
+        false：表示只用当前logger的appender-ref，true：
+        表示当前logger的appender-ref和rootLogger的appender-ref都有效
+    -->
+    <!-- hibernate logger -->
+    <logger name="com.atguigu" level="debug" />
+    <!-- Spring framework logger -->
+    <logger name="org.springframework" level="debug" additivity="false"></logger>
+
+
+
+    <!--
+    root与logger是父子关系，没有特别定义则默认为root，任何一个类只会和一个logger对应，
+    要么是定义的logger，要么是root，判断的关键在于找到这个logger，然后判断这个logger的appender和level。
+    -->
+    <root level="info">
+        <appender-ref ref="stdout" />
+        <appender-ref ref="appLogAppender" />
+    </root>
+</configuration>
+
+
+====================
+File: target\classes\mapper\CommentMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.CommentMapper">
+
+    <select id="getList" resultType="com.gk.study.entity.Comment">
+        select A.*, B.username, C.title
+        from b_comment as A
+        join b_user as B on (A.user_id=B.id)
+        join b_thing as C on (A.thing_id=C.id)
+        order by A.comment_time desc;
+    </select>
+
+    <select id="selectThingCommentList" parameterType="map" resultType="com.gk.study.entity.Comment">
+        select A.*, B.username, C.title
+        from b_comment as A
+                 join b_user as B on (A.user_id=B.id)
+                 join b_thing as C on (A.thing_id=C.id)
+        <if test="thingId != null">
+            where A.thing_id=#{thingId}
+        </if>
+        <if test="order == 'recent'">
+            order by A.comment_time desc;
+        </if>
+        <if test="order == 'hot'">
+            order by A.like_count desc;
+        </if>
+    </select>
+
+    <select id="selectUserCommentList" parameterType="map" resultType="com.gk.study.entity.Comment">
+        select A.*, B.username, C.title, C.cover
+        from b_comment as A
+        join b_user as B on (A.user_id=B.id)
+        join b_thing as C on (A.thing_id=C.id)
+        <if test="userId != null">
+            where A.user_id=#{userId}
+        </if>
+            order by A.comment_time desc;
+    </select>
+
+
+</mapper>
+
+
+====================
+File: target\classes\mapper\CouponMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.CouponMapper">
+
+    <select id="getList" resultType="com.gk.study.entity.Coupon">
+        select *
+        from b_coupon
+        order by create_time desc;
+    </select>
+
+    <select id="getByCode" resultType="com.gk.study.entity.Coupon">
+        select *
+        from b_coupon
+        where code = #{code}
+        limit 1;
+    </select>
+
+</mapper>
+
+
+====================
+File: target\classes\mapper\CouponReceiveMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.CouponReceiveMapper">
+
+    <select id="getUserCoupon" resultType="com.gk.study.entity.CouponReceive">
+        select *
+        from b_coupon_receive
+        where user_id = #{userId}
+          and coupon_id = #{couponId}
+        limit 1;
+    </select>
+
+    <update id="markCouponUsed">
+        update b_coupon_receive
+        set status   = '2',
+            use_time = #{useTime}
+        where user_id = #{userId}
+          and coupon_id = #{couponId}
+          and status = '1'
+    </update>
+
+</mapper>
+
+
+====================
+File: target\classes\mapper\OrderMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.OrderMapper">
+
+    <select id="getList" resultType="com.gk.study.entity.Order">
+        select A.*, B.username
+        from b_order as A
+        join b_user as B on (A.user_id=B.id)
+        order by A.order_time desc;
+    </select>
+
+    <select id="getUserOrderList" resultType="com.gk.study.entity.Order">
+        select A.*, B.username
+        from b_order as A
+                 join b_user as B on (A.user_id=B.id)
+        where 2>1
+        <if test="userId != null">
+            and A.user_id=#{userId}
+        </if>
+        <if test="status != null and status != ''">
+            and A.status=#{status}
+        </if>
+        order by A.order_time desc;
+    </select>
+
+</mapper>
+
+
+====================
+File: target\classes\mapper\OverviewMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.OverviewMapper">
+
+    <select id="getPopularThing" resultType="java.util.HashMap">
+        select A.thing_id, B.title, count(A.thing_id) as count
+        from b_order A join b_thing B on A.thing_id=B.id
+        group by A.thing_id
+        order by count desc;
+    </select>
+
+    <select id="getPopularClassification" resultType="java.util.HashMap">
+        select B.title, count(B.title) as count
+        from b_thing A join B_classification B on A.classification_id = B.id
+        group by B.title
+        order by count desc limit 5;
+    </select>
+
+    <select id="getWebVisitData" parameterType="java.lang.String" resultType="com.gk.study.entity.VisitData">
+        select re_ip, count(re_ip) as count
+        from b_op_log
+        <where>
+        <if test="day != null">
+            re_time like CONCAT('%',#{day},'%')
+        </if>
+        </where>
+        group by re_ip
+    </select>
+</mapper>
+
+
+====================
+File: target\classes\mapper\ThingCollectMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.ThingCollectMapper">
+
+    <select id="getThingCollectList" parameterType="map" resultType="java.util.Map">
+        select A.*, B.title, B.cover
+        from b_thing_collect  A
+        join b_thing  B on (A.thing_id=B.id)
+        where A.user_id=#{userId}
+    </select>
+
+</mapper>
+
+
+====================
+File: target\classes\mapper\ThingMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.ThingMapper">
+
+
+    <select id="getList" resultType="com.gk.study.entity.Thing">
+        select * from b_thing;
+    </select>
+
+
+</mapper>
+
+
+====================
+File: target\classes\mapper\ThingWishMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.ThingWishMapper">
+
+    <select id="getThingWishList" parameterType="map" resultType="java.util.Map">
+        select A.*, B.title, B.cover
+        from b_thing_wish  A
+        join b_thing  B on (A.thing_id=B.id)
+        where A.user_id=#{userId}
+    </select>
+
+</mapper>
+
+
+====================
+File: target\classes\mapper\UserMapper.xml
+====================
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gk.study.mapper.UserMapper">
+
+
+</mapper>
+

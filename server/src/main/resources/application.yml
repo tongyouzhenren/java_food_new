@@ -1,0 +1,29 @@
+server:
+  port: 9100
+  servlet:
+    context-path: /api
+
+# =============================
+# 自定义配置（路径要写成双斜杠）
+# =============================
+BASE_LOCATION: D:\\aliyun_workspace\\java_food   # ← 必须改成双斜杠 \\
+
+DB_NAME: java_food   # ← 你自己的数据库名（必须在 MySQL 里存在）
+
+File:
+  uploadPath: ${BASE_LOCATION}\\server\\upload
+
+# =============================
+# 数据库配置（你必须填写账号密码）
+# =============================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/jave_food?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8
+
+    username: root     # ← 你自己填，比如 root
+    password: 123456       # ← 你自己填，比如 123456
+
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true
