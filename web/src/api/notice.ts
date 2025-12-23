@@ -7,8 +7,8 @@ enum URL {
     delete = '/api/notice/delete',
 }
 
-const listApi = async (params: any) =>
-    get<any>({url: URL.list, params: params, data: {}, headers: {}});
+const listApi = async (params?: any) =>
+    get<any>({url: URL.list, params: params ?? {}, data: {}, headers: {}});
 const createApi = async (data: any) =>
     post<any>({
         url: URL.create,
