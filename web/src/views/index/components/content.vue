@@ -1,6 +1,13 @@
 <template>
   <div class="content">
     <div class="content-header">
+      <div class="ad-banner" v-if="contentData.adList.length">
+        <div class="ad-item" v-for="item in contentData.adList" :key="item.id">
+          <a :href="item.link" target="_blank" rel="noopener noreferrer">
+            <img :src="item.imageUrl" :alt="item.link || '广告'" />
+          </a>
+        </div>
+      </div>
       <div class="filter-toggle">
         <button class="filter-button" @click="toggleFilters">
           {{ contentData.showFilters ? '收起菜品筛选' : '打开菜品筛选' }}
@@ -96,6 +103,7 @@
 import {listApi as listClassificationList} from '/@/api/classification'
 import {listApi as listTagList} from '/@/api/tag'
 import {listApi as listThingList} from '/@/api/thing'
+import {listApi as listAdList} from '/@/api/ad'
 import {BASE_URL} from "/@/store/constants";
 import {useUserStore} from "/@/store";
 
@@ -118,6 +126,8 @@ const contentData = reactive({
   thingData: [],
   pageData: [],
 
+  adList: [],
+
   page: 1,
   total: 0,
   pageSize: 12,
@@ -126,6 +136,7 @@ const contentData = reactive({
 onMounted(() => {
   initSider()
   getThingList({})
+  getAdList()
 })
 
 const initSider = () => {
@@ -210,6 +221,30 @@ const getThingList = (data) => {
   })
 }
 
+const getAdList = () => {
+  listAdList({}).then(res => {
+    contentData.adList = (res.data || []).map(item => ({
+      ...item,
+      imageUrl: item.image ? `${BASE_URL}/api/staticfiles/image/${item.image}` : '',
+      link: normalizeLink(item.link),
+    })).filter(item => item.imageUrl && item.link)
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
+const normalizeLink = (link) => {
+  if (!link) {
+    return ''
+  }
+
+  if (/^https?:\/\//i.test(link)) {
+    return link
+  }
+
+  return `https://${link.replace(/^\/+/, '')}`
+}
+
 
 </script>
 
@@ -226,6 +261,31 @@ const getThingList = (data) => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.ad-banner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.ad-item {
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ad-item img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.ad-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
 }
 
 .filter-toggle {
